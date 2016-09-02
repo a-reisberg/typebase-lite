@@ -94,7 +94,7 @@ object LaunchDemo extends App {
   // Would it be nicer to have an index if we do this query often? Enter View!
 
   // First, create TblView. The key of the index is String (for city) and Int (for age).
-  // We don't emit and value, so we put in Empty.
+  // More general MapViews and also be created via createMapView. Map-Reduce will come soon.
   printSection("Same query, but with index")
   val cityAgeIndex = tblDb.createIndexView[String :: Int :: HNil]("city-age", "1.0", {
     case e: Employee => Set(e.address.city :: e.age :: HNil)
