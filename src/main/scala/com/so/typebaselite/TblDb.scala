@@ -2,7 +2,7 @@ package com.so.typebaselite
 
 import java.util
 
-import com.couchbase.lite.Document.DocumentUpdater
+import com.couchbase.lite.Document.{ChangeEvent, ChangeListener, DocumentUpdater}
 import com.couchbase.lite._
 import com.so.typebaselite.TblRow._
 import com.so.typebaselite.mapper._
@@ -77,6 +77,21 @@ case class TblDb[Doc](db: Database)(implicit docCodec: Codec.Aux[Doc, JHashMap])
         true
       }
     })
+  }
+
+  def addChangeListener[U](id: String)(f: Doc => U): Option[Subscription] = {
+    for (doc <- Option(db.getDocument(id))) yield {
+      val listener = new ChangeListener {
+        override def changed(event: ChangeEvent): Unit = {
+          for (d <- docCodec.decode(event.getSource))
+            f(d)
+        }
+      }
+
+      doc.addChangeListener(listener)
+
+      Subscription(() => doc.removeChangeListener(listener))
+    }
   }
 
   def createTypeView: TblTypeView[Doc] = {
