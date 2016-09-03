@@ -1,10 +1,9 @@
 package com.so
 
 import com.so.typebaselite.mapper._
-import shapeless.{HNil, Typeable}
+import shapeless.{HNil, Typeable, _}
 
-import shapeless._
-import language.implicitConversions
+import scala.language.implicitConversions
 
 /**
   * Created by a.reisberg on 8/31/2016.

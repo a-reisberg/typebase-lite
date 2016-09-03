@@ -25,26 +25,26 @@ trait FromGen[Out] {
 trait LowPriorityFromGen3 {
   // For genuine coproducts constructed by hand with :+:, i.e. not coming from apply LabelledGeneric to a trait.
   implicit def coprodToGenNoKey[H, T <: Coproduct](implicit
-                                              fromGenV: Lazy[FromGen.Aux[H, JMapInterface]],
-                                              basisT: Basis[H :+: T, T],
-                                              fromGenT: Lazy[FromGen.Aux[T, JMapInterface]]): FromGen.Aux[H :+: T, JMapInterface] =
-    new FromGen[H :+: T] {
-      type In = JMapInterface
+                                                   fromGenV: Lazy[FromGen.Aux[H, JMapInterface]],
+                                                   basisT: Basis[H :+: T, T],
+                                                   fromGenT: Lazy[FromGen.Aux[T, JMapInterface]]): FromGen.Aux[H :+: T, JMapInterface] =
+  new FromGen[H :+: T] {
+    type In = JMapInterface
 
-      type HT = H :+: T
+    type HT = H :+: T
 
-      override def apply(in: In, typeHint: Boolean = defaultTypeHint): Option[HT] = {
-        lazy val headOption: Option[HT] =
-          for (v <- fromGenV.value(in, typeHint))
-            yield Coproduct[HT](v)
+    override def apply(in: In, typeHint: Boolean = defaultTypeHint): Option[HT] = {
+      lazy val headOption: Option[HT] =
+        for (v <- fromGenV.value(in, typeHint))
+          yield Coproduct[HT](v)
 
-        lazy val tailOption: Option[HT] =
-          for (t <- fromGenT.value(in, typeHint)) yield t.embed[H :+: T]
+      lazy val tailOption: Option[HT] =
+        for (t <- fromGenT.value(in, typeHint)) yield t.embed[H :+: T]
 
-        if (headOption.isDefined) headOption
-        else tailOption
-      }
+      if (headOption.isDefined) headOption
+      else tailOption
     }
+  }
 }
 
 // For Tuple and HList from JListInterface
