@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/a-reisberg/typebase-lite.svg?branch=master)](https://travis-ci.org/a-reisberg/typebase-lite)
+
 typebase-lite
 =============
 Typebase lite is a Scala wrapper for the Java version of Couchbase lite. It provides a convenient mapper between Couchbase lite's data and Scala's classes, free of boilerplate and runtime reflection. Moreover, many convenient combinators are also given to combine and reuse queries in a type-safe and functional manner. 
@@ -199,7 +201,7 @@ And then, start the monitoring
 liveQ.start()
 ```
 
-Suppose someone new entered the db:
+Suppose someone new enters the db:
 ```scala
 tblDb.put(Employee("New Comer", 31, Address("New York", "99999")))
 ```
