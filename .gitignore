@@ -33,4 +33,4 @@ out
 .vertx
 
 # couchbase lite stuff
-data
+/data
