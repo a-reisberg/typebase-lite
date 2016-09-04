@@ -13,16 +13,16 @@ Typebase lite is a powerful ORM for Couchbase lite: free of boilerplate and runt
 4. [A long running example](#a-long-running-example)
     1. [Standard JVM](#standard-jvm)
     2. [Android](#android)
-    3. [Define schema](#define-schema)
-    4. [Import packages](#import-packages)
-    5. [Initialize database](#initialize-database)
+    3. [Import packages](#import-packages)
+    4. [Initialize database](#initialize-database)
+    5. [Define schema](#define-schema)
     6. [Insert](#insert)
     7. [Query by keys](#query-by-keys)
     8. [Query by types](#query-by-types)
     9. [More complex queries](#more-complex-queries)
     10. [Index/View](#indexview)
     11. [Live queries](#live-queries)
-5. [A more in-depth overview](#a-more-indepth-overview)
+5. [A more in-depth overview](#a-more-in-depth-overview)
     
 
 ##What?
@@ -92,18 +92,6 @@ You can jump straight ahead to `com.so.tbldemo.launch.LaunchDemo` and run it.
 #### Android
 The Android demo could be found here: [https://github.com/a-reisberg/tbl-android-demo](https://github.com/a-reisberg/tbl-android-demo).
 
-#### Define schema
-First we define the following classes which we want to persist in the database. The trait `Company` will be the super type of everything stored in our database.  
-```scala
-sealed trait Company
-
-case class Department(name: String, employeeIds: List[String]) extends Company
-
-case class Employee(name: String, age: Int, address: Address) extends Company
-
-case class Address(city: String, zip: String)
-```
-
 #### Import packages
 For this example, we need the following imports:
 ```scala
@@ -127,6 +115,18 @@ val db = manager.getDatabase("my-database")
 The only thing we need to do to initialize Typebase lite is to add the following line
 ```scala
 val tblDb = TblDb[Company](db)
+```
+
+#### Define schema
+First we define the following classes which we want to persist in the database. The trait `Company` will be the super type of everything stored in our database. This part is completely independent of Typebase lite.  
+```scala
+sealed trait Company
+
+case class Department(name: String, employeeIds: List[String]) extends Company
+
+case class Employee(name: String, age: Int, address: Address) extends Company
+
+case class Address(city: String, zip: String)
 ```
 
 #### Insert
