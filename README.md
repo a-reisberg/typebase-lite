@@ -43,7 +43,7 @@ The reason why we choose Couchbase lite is its support for Nosql and, more cruci
 ####Why Typebase lite?
 Type-safety is one of the main pain points of using a database. It comes in two places: querying and mapping between the database's and the language's data types. In the case of Couchbase lite, queried results are usually of the form (Java's) `Map[String, AnyRef]`, and anything, for eg. an `Array` or another nested `Map`, might present in the `AnyRef` part. This makes querying and persisting data a rather painful and error prone process.
 
-Typebase lite automates all of that boring/error prone parts for you!
+Typebase lite automates all of those boring/error prone parts for you!
 
 ## Quick start
 To start using this library, first clone the repository 
