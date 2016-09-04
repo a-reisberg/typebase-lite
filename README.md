@@ -22,6 +22,17 @@ if you're using it in the standard JVM, or
 ```scala
 libraryDependencies += "com.so" %% "typebase-lite-android" % "0.1-SNAPSHOT"
 ```
+if you're using it on Android.
+
+It works with both the standard storage option or ForestDb. To use the latter, just add
+```scala
+libraryDependencies += "com.couchbase.lite" % "couchbase-lite-java-forestdb" % "1.3.0"
+```
+or
+```scala
+libraryDependencies += "com.couchbase.lite" % "couchbase-lite-android-forestdb" % "1.3.0"
+```
+depending on whether you're writing for Android.
 
 Many of the concepts here are related to (and influenced by) the ones in Couchbase lite, since we are, after all, a wrapper of that library. So, it might be instructive to first give a quick glance at their documentation.
 
