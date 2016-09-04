@@ -122,6 +122,20 @@ case class TblDb[Doc](db: Database)(implicit docCodec: Codec.Aux[Doc, JHashMap])
     new TblIndexView(view)
   }
 
+  def createRedirectView[K](name: String, version: String, mapper: Doc => Set[(K, String)])(implicit kCodec: Codec[K]): TblIndexView[K, Doc] = {
+    val view = db.getView(name)
+
+    view.setMap(new Mapper {
+      override def map(document: util.Map[String, AnyRef], emitter: Emitter): Unit = {
+        for (doc <- docCodec.decode(document))
+          for ((k, id) <- mapper(doc))
+            emitter.emit(kCodec.encode(k), TblDb.redirectMap(id))
+      }
+    }, version)
+
+    new TblIndexView(view)
+  }
+
   def createMapView[K, V](name: String, version: String, mapper: Doc => Set[(K, V)])(implicit
                                                                                      kCodec: Codec[K],
                                                                                      vCodec: Codec[V]): TblView[K, V, Doc] = {
@@ -159,5 +173,11 @@ object TblDb {
   def getCbProperties(document: Document): Map[String, AnyRef] =
     document.getProperties.asScala.filter(_._1.startsWith("_"))
 
-  val emptyMap = new util.HashMap[String, AnyRef]()
+  val emptyMap: util.HashMap[String, AnyRef] = new util.HashMap[String, AnyRef]()
+
+  def redirectMap(id: String): util.HashMap[String, AnyRef] = {
+    val map = new util.HashMap[String, AnyRef]()
+    map.put("_id", id)
+    map
+  }
 }
