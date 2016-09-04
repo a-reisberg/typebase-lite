@@ -205,7 +205,7 @@ Now, we want to be notified whenever `cityAgeQ2` changes (i.e. someone new from 
 
 First create the live query:
 ```scala
-val liveQ = cityAgeIndex.sLiveQuery(startKey("New York" :: 30 :: HNil), endKey("New York" :: Last)).where(_.is[Employee])
+val liveQ = cityAgeIndex.sLiveQuery(startKey("New York" :: 30 :: HNil), endKey("New York" :: Last)).flatMap(_.to[Employee])
 ```
 
 Next, subscribe (in this case, we just dump the query's results to StdOut)

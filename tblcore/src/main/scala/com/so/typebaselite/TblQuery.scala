@@ -49,7 +49,7 @@ trait TblQuery[A] {
 
   def foreach[U](f: A => U): Unit = iterator.foreach(f)
 
-  def where[B](f: A => Option[B]): FullAux[S, E, B] = flatMap[B](f(_))
+  def where(p: A => Boolean): FullAux[S, E, A] = filter(p)
 
   def map[B, BS <: Stream[B]](f: A => B)(implicit cbf: CanBuildFrom[Stream[A], B, BS]): FullAux[S, E, B] =
     lift(_.map[B, BS](f))

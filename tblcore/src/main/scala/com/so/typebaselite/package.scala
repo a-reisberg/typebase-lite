@@ -29,7 +29,9 @@ package object typebaselite {
   implicit def castFilterOp[T](t: T): CastFilterOp[T] = new CastFilterOp(t)
 
   final class CastFilterOp[T](val t: T) extends AnyVal {
-    def is[U](implicit cast: Typeable[U]): Option[U] = cast.cast(t)
+    def to[U](implicit cast: Typeable[U]): Option[U] = cast.cast(t)
+
+    def is[U](implicit cast: Typeable[U]): Boolean = cast.cast(t).isDefined
   }
 
 }
