@@ -16,7 +16,8 @@ lazy val commonSettings = Seq(
   scalaVersion := "2.11.8",
   organization := myOrg,
   version := currentVersion,
-  scalacOptions ++= Seq("-feature", "-language:postfixOps", "-language:implicitConversions", "-language:higherKinds")
+  javacOptions ++= Seq("-source", "1.7", "-target", "1.7"),
+  scalacOptions ++= Seq("-feature", "-language:postfixOps", "-language:implicitConversions", "-language:higherKinds", "-target:jvm-1.7")
 )
 
 lazy val tblCore = (project in file("tblcore"))
@@ -25,8 +26,7 @@ lazy val tblCore = (project in file("tblcore"))
     name := "typebase-lite-core",
     libraryDependencies ++= Seq(
       "com.chuusai" %% "shapeless" % shapelessVersion,
-      "com.couchbase.lite" % "couchbase-lite-java" % cblJavaVersion,
-      "com.couchbase.lite" % "couchbase-lite-java-forestdb" % cblJavaForestDBVersion
+      "com.couchbase.lite" % "couchbase-lite-java" % cblJavaVersion % "compile-internal"
     )
   )
 
@@ -47,4 +47,13 @@ lazy val tblAndroid = (project in file("tblandroid"))
       "com.couchbase.lite" % "couchbase-lite-android" % cblAndroidVersion
     )
   ) dependsOn tblCore  aggregate tblCore
+
+lazy val tblJavaDemo = (project in file ("tbljavademo"))
+  .settings(commonSettings)
+  .settings(
+    name := "typebase-lite-java-demo",
+    libraryDependencies ++= Seq(
+      "com.couchbase.lite" % "couchbase-lite-java-forestdb" % cblJavaForestDBVersion
+    )
+  ) dependsOn tblJava
 
