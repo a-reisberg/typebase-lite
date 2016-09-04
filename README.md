@@ -4,7 +4,7 @@ typebase-lite
 =============
 Typebase lite is a Scala wrapper for the Java version of Couchbase lite. It provides a convenient mapper between Couchbase lite's data and Scala's classes, free of boilerplate and runtime reflection. Moreover, many convenient combinators are also given to combine and reuse queries in a type-safe and functional manner. 
 
-Currently, it supports the following features: Map views (reduce will come soon), queries and live queries.
+Currently, it supports the following features: Map views (reduce will come soon), queries and live queries. It works on both Android and the standard Jvm.
 
 It's a work in progress. The api's might be changed without any prior warning. **You** are very much welcomed to give comments/suggestions or to contribute to the project.
 
@@ -14,25 +14,31 @@ To start using this library, first clone the repository and run
 sbt publishLocal
 ```
 
-Inside `build.sbt`, add the following line:
-
+Inside the `build.sbt` of your project, add the following line
 ```scala
-libraryDependencies += "com.so" %% "typebase-lite" % "0.1-SNAPSHOT"
+libraryDependencies += "com.so" %% "typebase-lite-java" % "0.1-SNAPSHOT"
+```
+if you're using it in the standard JVM, or
+```scala
+libraryDependencies += "com.so" %% "typebase-lite-android" % "0.1-SNAPSHOT"
 ```
 
 Many of the concepts here are related to (and influenced by) the ones in Couchbase lite, since we are, after all, a wrapper of that library. So, it might be instructive to first give a quick glance at their documentation.
 
 # Examples
-The examples mentioned here could be found in `com.so.tbldemo` (in `test` directory). More specifically, the data schema is defined in
+## Standard JVM
+The examples mentioned below runs outside of Android, and could be found in the `tbljavademo` subproject. More specifically, the data schema is defined in
 ```scala
-com.so.tbldemo.Company
+com.so.tbldemo.data
 ```
 and the running example implemented in
 ```scala
 com.so.tbldemo.launch.LaunchDemo
 ```
-
 You can jump straight ahead to `com.so.tbldemo.launch.LaunchDemo` and run it.
+
+## Android
+The Android demo could be found here: [https://github.com/a-reisberg/tbl-android-demo](https://github.com/a-reisberg/tbl-android-demo).
 
 ## Define data
 First we define the following classes which we want to persist in the database. The trait `Company` will be the super type of everything stored in our database.  
