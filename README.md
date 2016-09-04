@@ -7,21 +7,21 @@ Typebase lite is a powerful ORM for Couchbase lite: free of boilerplate and runt
 ##Table of contents
 1. [What?](#what)
 2. [Why?](#why)
-    i.[Why Couchbase lite?](#why-couchbase-lite)
-    ii.[Why Typebase lite?](#why-typebase-lite)
+    1. [Why Couchbase lite?](#why-couchbase-lite)
+    2. [Why Typebase lite?](#why-typebase-lite)
 3. [Quick start](#quick-start)
 4. [A long running example](#a-long-running-example)
-    i. [Standard JVM](#standard-jvm)
-    ii. [Android](#android)
-    iii. [Define schema](#define-schema)
-    iv. [Import packages](#import-packages)
-    v. [Initialize database](#initialize-database)
-    vi. [Insert](#insert)
-    vii. [Query by keys](#query-by-keys)
-    viii. [Query by types](#query-by-types)
-    ix. [More complex queries](#more-complex-queries)
-    x. [Index/View](#indexview)
-    xi. [Live queries](#live-queries)
+    1. [Standard JVM](#standard-jvm)
+    2. [Android](#android)
+    3. [Define schema](#define-schema)
+    4. [Import packages](#import-packages)
+    5. [Initialize database](#initialize-database)
+    6. [Insert](#insert)
+    7. [Query by keys](#query-by-keys)
+    8. [Query by types](#query-by-types)
+    9. [More complex queries](#more-complex-queries)
+    10. [Index/View](#indexview)
+    11. [Live queries](#live-queries)
 5. [A more in-depth overview](#a-more-indepth-overview)
     
 
@@ -31,7 +31,9 @@ Typebase lite is a thin Scala wrapper for the Java and Android versions of Couch
 
 Currently, it supports the following features: Map views (Reduce will come soon), queries and live queries. It works on both Android and the standard JVM. Since it's just a thin wrapper, any unsupported feature can be done directly with Couchbase lite.  
 
-It's a work in progress. The api's might change without any prior warning. There's much to be improved and **you** are very welcome to give comments/suggestions or to contribute!
+It's a work in progress. The api might change without any prior warning. There's much to be improved and **you** are very welcome to try out, give comments/suggestions, and contribute!
+
+> Note: We do not aim to wrap all features of Couchbase lite. Rather, our current goal is to provide a minimal and composable set of functionalities that improve the type-safety of Couchbase lite. Thus, if type-safety is not an issue for a feature X, X should be used directly via Couchbase lite's api.
 
 ##Why?
 
