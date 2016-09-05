@@ -1,6 +1,6 @@
 package com.so.tbldemo.launch
 
-import com.couchbase.lite.{JavaContext, Manager}
+import com.couchbase.lite._
 import com.so.tbldemo.data._
 import com.so.typebaselite.TblQuery._
 import com.so.typebaselite._
