@@ -20,11 +20,11 @@ package object typebaselite {
 
   val Last: Last = Empty :: HNil
 
-  implicit val ignoreCodec: Codec[Empty] = Codec.codecNoHint[Empty.type]
+  implicit val ignoreCodec: Codec[Empty] = Codec.noHint[Empty.type]
 
-  implicit val docInfoCodec = Codec.codecNoHintAux[QueryDocInfo, JHashMap]
+  implicit val docInfoCodec = Codec.noHintAux[QueryDocInfo, JHashMap]
 
-  implicit val stringCodec = Codec.applyAux[String, String]
+  implicit val stringCodec = Codec.aux[String, String]
 
   implicit def castFilterOp[T](t: T): CastFilterOp[T] = new CastFilterOp(t)
 

@@ -15,9 +15,9 @@ object Codec {
   type Aux[T, Out0] = Codec[T] {type Out = Out0}
 
   implicit def apply[T](implicit encodeEv: ToGen[T], decodeEv: FromAny[T]): Aux[T, encodeEv.Out] =
-    applyAux[T, encodeEv.Out](encodeEv, decodeEv)
+    aux[T, encodeEv.Out](encodeEv, decodeEv)
 
-  def applyAux[T, Out0](implicit encodeEv: ToGen.Aux[T, Out0], decodeEv: FromAny[T]): Aux[T, Out0] =
+  def aux[T, Out0](implicit encodeEv: ToGen.Aux[T, Out0], decodeEv: FromAny[T]): Aux[T, Out0] =
     new Codec[T] {
       type Out = Out0
 
@@ -26,7 +26,7 @@ object Codec {
       override def decode(i: AnyRef): Option[T] = decodeEv(i)
     }
 
-  def codecNoHintAux[T, Out0](implicit encodeEv: ToGen.Aux[T, Out0], decodeEv: FromAny[T]): Aux[T, Out0] =
+  def noHintAux[T, Out0](implicit encodeEv: ToGen.Aux[T, Out0], decodeEv: FromAny[T]): Aux[T, Out0] =
     new Codec[T] {
       type Out = Out0
 
@@ -35,6 +35,6 @@ object Codec {
       override def decode(i: AnyRef): Option[T] = decodeEv(i, typeHint = false)
     }
 
-  def codecNoHint[T](implicit encodeEv: ToGen[T], decodeEv: FromAny[T]): Aux[T, encodeEv.Out] =
-    codecNoHintAux[T, encodeEv.Out](encodeEv, decodeEv)
+  def noHint[T](implicit encodeEv: ToGen[T], decodeEv: FromAny[T]): Aux[T, encodeEv.Out] =
+    noHintAux[T, encodeEv.Out](encodeEv, decodeEv)
 }
