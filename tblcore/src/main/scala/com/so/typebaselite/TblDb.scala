@@ -71,7 +71,7 @@ case class TblDb[Doc](db: Database)(implicit docCodec: Codec.Aux[Doc, JHashMap])
     * Same as [[apply(ids)]] above
     */
   def get(ids: String*): Seq[Doc] =
-    ids.flatMap(key => Option(db.getDocument(key).getProperties) flatMap docCodec.decode)
+    ids.flatMap(key => Option(db.getDocument(key)).map(_.getProperties) flatMap docCodec.decode)
 
   /**
     * Get both the Couchbase's document and the parsed document
