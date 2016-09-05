@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.org/a-reisberg/typebase-lite.svg?branch=master)](https://travis-ci.org/a-reisberg/typebase-lite)
 
 #typebase-lite
-Typebase lite is a powerful ORM for Couchbase lite: free of boilerplate and runtime reflection.
+Typebase lite is a functional ORM for Couchbase lite: free of boilerplate and runtime reflection.
 
 
 ##Table of contents
@@ -9,8 +9,13 @@ Typebase lite is a powerful ORM for Couchbase lite: free of boilerplate and runt
 2. [Why?](#why)
     1. [Why Couchbase lite?](#why-couchbase-lite)
     2. [Why Typebase lite?](#why-typebase-lite)
-3. [Quick start](#quick-start)
-4. [A long running example](#a-long-running-example)
+3. [Show me the code](#show-me-the-code)
+    1. [Quick demo](#quick-demo)
+    2. [What is happening behind the scene?](#what-is-happening-behind-the-scene)
+    3. [Isn’t that slow? How about indexing?](#isnt-that-slow-how-about-indexing)
+    4. [More complex queries?](#more-complex-queries)
+4. [Quick start](#quick-start)
+5. [A long running example](#a-long-running-example)
     1. [Standard JVM](#standard-jvm)
     2. [Android](#android)
     3. [Import packages](#import-packages)
@@ -22,12 +27,12 @@ Typebase lite is a powerful ORM for Couchbase lite: free of boilerplate and runt
     9. [More complex queries](#more-complex-queries)
     10. [Index/View](#indexview)
     11. [Live queries](#live-queries)
-5. [A more in-depth overview](#a-more-in-depth-overview)
+6. [A more in-depth overview](#a-more-in-depth-overview)
     
 
 ##What?
 
-Typebase lite is a thin Scala wrapper for the Java and Android versions of Couchbase lite. It provides an automatic mapper between Couchbase lite's data and Scala's case classes and sealed trait hierarchies, free of boilerplate and runtime reflection. Moreover, many convenient functional combinators are also given to combine and reuse queries in a type-safe and functional manner a la Linq. 
+Typebase lite is a thin Scala wrapper for the Java and Android versions of Couchbase lite. It provides an automatic mapper between Couchbase lite's data and Scala's case classes and sealed trait hierarchies, free of boilerplate and runtime reflection. Moreover, many convenient functional combinators are also given to create and compose queries in a type-safe and functional manner a la LINQ. 
 
 Currently, it supports the following features: Map views (Reduce will come soon), queries and live queries. It works on both Android and the standard JVM. Since it's just a thin wrapper, any unsupported feature can be done directly with Couchbase lite.  
 
@@ -38,12 +43,48 @@ It's a work in progress. The api might change without any prior warning. There's
 ##Why?
 
 ####Why Couchbase lite?
-The reason why we choose Couchbase lite is its support for Nosql and, more crucially, its powerful sync feature which makes writing apps with offline features pleasant.
+The reason why we choose Couchbase lite is its support for NoSql and, more crucially, its powerful sync feature which makes writing apps with offline functionality pleasant.
 
 ####Why Typebase lite?
 Type-safety is one of the main pain points of using a database. It comes in two places: querying and mapping between the database's and the language's data types. In the case of Couchbase lite, queried results are usually of the form (Java's) `Map[String, AnyRef]`, and anything, for eg. an `Array` or another nested `Map`, might present in the `AnyRef` part. This makes querying and persisting data a rather painful and error prone process.
 
 Typebase lite automates all of those boring/error prone parts for you!
+
+##Show me the code
+####Quick demo
+```scala
+val query = for {
+    employee <- tblDb.typeView[Employee].filter(e => (e.age >= 30) && (e.address.city == "New York"))
+} yield employee
+```
+will create a query of all employees living in New York, and are at least 30 years old.
+ 
+```scala
+query.foreach(println(_))
+```
+will execute the query and print out the results.
+
+####What is happening behind the scene?
+`tblDb` is Typebase lite's database object. The code above will loop over all employees and filter out the ones that satisfy our conditions.
+
+####Isn't that slow? How about indexing?
+Yes! In the above, we already used one, which indexes the types of the documents.
+
+You can create a custom indices, even **composite indices** are supported! In this case we want to create a composite index consisting of 2 keys: city and age:
+```scala
+val cityAgeIndex = tblDb.createIndexView[String :: Int :: HNil]("city-age", "1.0", {
+    case e: Employee => Set(e.address.city :: e.age :: HNil)
+    case _ => Set()
+})
+```
+
+Now, the same query as above, but now use the index
+```scala
+val query2 = cityAgeIndex.sQuery(startKey("New York" :: 30 :: HNil), endKey("New York" :: Last))
+```
+
+####More complex queries?
+Queries can be composed and reused in a functional manner, and can be mixed and matched seamlessly with Scala's collections as well.
 
 ## Quick start
 To start using this library, first clone the repository 
@@ -95,11 +136,9 @@ The Android demo could be found here: [https://github.com/a-reisberg/tbl-android
 #### Import packages
 For this example, we need the following imports:
 ```scala
-import com.couchbase.lite.{JavaContext, Manager}
-import com.so.tbldemo.data._
+import com.couchbase.lite._
 import com.so.typebaselite.TblQuery._
 import com.so.typebaselite._
-import com.so.typebaselite.mapper._
 import shapeless._
 ```
 
@@ -118,7 +157,7 @@ val tblDb = TblDb[Company](db)
 ```
 
 #### Define schema
-First we define the following classes which we want to persist in the database. The trait `Company` will be the super type of everything stored in our database. This part is completely independent of Typebase lite.  
+First we define the following classes which we want to persist in the database. The trait `Company` will be the super type of everything stored in our database. This part is **completely independent** of Typebase lite.  
 ```scala
 sealed trait Company
 
