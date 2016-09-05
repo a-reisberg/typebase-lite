@@ -4,7 +4,6 @@ import com.couchbase.lite.{JavaContext, Manager}
 import com.so.tbldemo.data._
 import com.so.typebaselite.TblQuery._
 import com.so.typebaselite._
-import com.so.typebaselite.mapper._
 import shapeless._
 
 import scala.io.StdIn

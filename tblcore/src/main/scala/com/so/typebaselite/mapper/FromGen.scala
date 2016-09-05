@@ -57,7 +57,7 @@ trait LowPriorityFromGen2 extends LowPriorityFromGen3 {
 
   implicit def hlistRecFromGenArr[H, JTH, T <: HList](implicit
                                                       fromGenH: Lazy[FromGen.Aux[H, JTH]],
-                                                      jthTypeable: Typeable[JTH],
+                                                      jthCastable: Castable[JTH],
                                                       fromGenT: Lazy[FromGen.Aux[T, JListInterface]]): FromGen.Aux[H :: T, JListInterface] =
     new FromGen[H :: T] {
       type In = JListInterface
@@ -65,7 +65,7 @@ trait LowPriorityFromGen2 extends LowPriorityFromGen3 {
       override def apply(in: In, typeHint: Boolean = defaultTypeHint): Option[H :: T] =
         for {
           e <- Try(in.remove(0)).toOption
-          castedE <- jthTypeable.cast(e)
+          castedE <- jthCastable.cast(e)
           r <- fromGenH.value(castedE, typeHint)
           tail <- fromGenT.value(in, typeHint)
         } yield r :: tail
@@ -85,7 +85,7 @@ trait LowPriorityFromGen2 extends LowPriorityFromGen3 {
 trait LowPriorityFromGen extends LowPriorityFromGen2 {
   implicit def prodFromGen[P, R <: HList](implicit
                                           genP: LabelledGeneric.Aux[P, R],
-                                          pTypeable: Typeable[P],
+                                          pCastable: Castable[P],
                                           fromGenR: Lazy[FromGen.Aux[R, JMapInterface]]): FromGen.Aux[P, JMapInterface] =
     new FromGen[P] {
       type In = JMapInterface
@@ -96,7 +96,7 @@ trait LowPriorityFromGen extends LowPriorityFromGen2 {
         if (typeHint) {
           in.get(typeHintKey) match {
             case str: String =>
-              if (str == pTypeable.describe.dropWhile(_ == '.').takeWhile(_ != '.')) res
+              if (str == pCastable.describe.dropWhile(_ == '.').takeWhile(_ != '.')) res
               else None
             case _ => None
           }
@@ -118,7 +118,7 @@ trait LowPriorityFromGen extends LowPriorityFromGen2 {
   implicit def hlistRecFromGen[K <: Symbol, V, JTV, T <: HList](implicit
                                                                 kWitness: Witness.Aux[K],
                                                                 fromGenV: Lazy[FromGen.Aux[V, JTV]],
-                                                                jtvTypeable: Typeable[JTV],
+                                                                jtvCastable: Castable[JTV],
                                                                 fromGenT: Lazy[FromGen.Aux[T, JMapInterface]]): FromGen.Aux[FieldType[K, V] :: T, JMapInterface] =
     new FromGen[FieldType[K, V] :: T] {
       type In = JMapInterface
@@ -126,7 +126,7 @@ trait LowPriorityFromGen extends LowPriorityFromGen2 {
       override def apply(in: In, typeHint: Boolean = defaultTypeHint): Option[FieldType[K, V] :: T] =
         for {
           e <- Option(in.get(kWitness.value.name))
-          castedE <- jtvTypeable.cast(e)
+          castedE <- jtvCastable.cast(e)
           r <- fromGenV.value(castedE, typeHint)
           tail <- fromGenT.value(in, typeHint)
         } yield field[K](r) :: tail
@@ -148,10 +148,10 @@ object FromGen extends LowPriorityFromGen {
     }
 
   def build[F[_], E, EG](builder: collection.mutable.Builder[E, F[E]])
-                        (it: java.util.Iterator[AnyRef], fromGenE: EG => Option[E], typeableEG: Typeable[EG]): Option[F[E]] = {
+                        (it: java.util.Iterator[AnyRef], fromGenE: EG => Option[E], egCastable: Castable[EG]): Option[F[E]] = {
     var allValid = true
     while (it.hasNext && allValid)
-      typeableEG.cast(it.next()) flatMap fromGenE match {
+      egCastable.cast(it.next()) flatMap fromGenE match {
         case Some(curr) => builder += curr
         case None => allValid = false
       }
@@ -183,33 +183,33 @@ object FromGen extends LowPriorityFromGen {
 
   implicit def listFromGen[E, EG](implicit
                                   fromGenE: Lazy[Aux[E, EG]],
-                                  egTypeable: Typeable[EG]): Aux[List[E], JListInterface] =
+                                  egCastable: Castable[EG]): Aux[List[E], JListInterface] =
     new FromGen[List[E]] {
       type In = JListInterface
 
       override def apply(in: In, typeHint: Boolean = defaultTypeHint): Option[List[E]] = {
         val builder = List.newBuilder[E]
-        build(builder)(in.iterator, fromGen2Converter(fromGenE.value, typeHint), egTypeable)
+        build(builder)(in.iterator, fromGen2Converter(fromGenE.value, typeHint), egCastable)
       }
     }
 
   implicit def setFromGen[E, EG](implicit
                                  fromGenE: Lazy[Aux[E, EG]],
-                                 egTypeable: Typeable[EG]): Aux[Set[E], JSetInterface] =
+                                 egCastable: Castable[EG]): Aux[Set[E], JSetInterface] =
     new FromGen[Set[E]] {
       type In = JSetInterface
 
       override def apply(in: In, typeHint: Boolean = defaultTypeHint): Option[Set[E]] = {
         val builder = Set.newBuilder[E]
-        build(builder)(in.iterator, fromGen2Converter(fromGenE.value, typeHint), egTypeable)
+        build(builder)(in.iterator, fromGen2Converter(fromGenE.value, typeHint), egCastable)
       }
     }
 
   implicit def mapFromGen[K, KG, V, VG](implicit
                                         fromGenK: Lazy[Aux[K, KG]],
-                                        kgTypeable: Typeable[KG],
+                                        kgCastable: Castable[KG],
                                         fromGenV: Lazy[Aux[V, VG]],
-                                        vgTypeable: Typeable[VG]): Aux[Map[K, V], JMapGenInterface] =
+                                        vgCastable: Castable[VG]): Aux[Map[K, V], JMapGenInterface] =
     new FromGen[Map[K, V]] {
       type In = JMapGenInterface
 
@@ -225,9 +225,9 @@ object FromGen extends LowPriorityFromGen {
           val curr = it.next()
 
           val pairOpt = for {
-            kg <- kgTypeable.cast(curr.getKey)
+            kg <- kgCastable.cast(curr.getKey)
             k <- fromGenKFunc(kg)
-            vg <- vgTypeable.cast(curr.getValue)
+            vg <- vgCastable.cast(curr.getValue)
             v <- fromGenVFunc(vg)
           } yield (k, v)
 
@@ -246,7 +246,7 @@ object FromGen extends LowPriorityFromGen {
   implicit def hlistRecWOptionFromGen[K <: Symbol, V, JTV, T <: HList](implicit
                                                                        kWitness: Witness.Aux[K],
                                                                        fromGenV: Lazy[Aux[V, JTV]],
-                                                                       jtvTypeable: Typeable[JTV],
+                                                                       jtvCastable: Castable[JTV],
                                                                        fromGenT: Lazy[Aux[T, JMapInterface]]): Aux[FieldType[K, Option[V]] :: T, JMapInterface] =
     new FromGen[FieldType[K, Option[V]] :: T] {
       type In = JMapInterface
@@ -256,7 +256,7 @@ object FromGen extends LowPriorityFromGen {
 
         val headOpt = for {
           e <- Option(in.get(kWitness.value.name))
-          castedE <- jtvTypeable.cast(e)
+          castedE <- jtvCastable.cast(e)
           r <- fromGenV.value(castedE, typeHint)
         } yield field[K](Some(r))
 

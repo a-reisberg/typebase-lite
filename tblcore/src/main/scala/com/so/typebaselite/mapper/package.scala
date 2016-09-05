@@ -5,9 +5,7 @@ import java.util.{ArrayList => JList, HashMap => JMap, HashSet => JSet}
 import shapeless._
 
 /**
-  * Conjure up instances of [[ToGen]], [[FromGen]] and [[FromAny]]. This object also
-  * provides implicit [[shapeless.Typeable]] instances needed for Java Set,
-  * List and Map via [[JavaTypeabilityHelper]].
+  * Conjure up instances of [[ToGen]], [[FromGen]] and [[FromAny]].
   *
   * Note that [[fromAny]] is more flexible than [[fromGen]] as it accepts [[AnyRef]].
   * The trade off is that [[fromGen]] has more type information. For example, the compiler
@@ -43,7 +41,7 @@ import shapeless._
   *
   * Created by a.reisberg on 8/23/2016.
   */
-package object mapper extends JavaTypeabilityHelper {
+package object mapper {
 
   /**
     * Semantically the same as [[FromGen]] except that the input type
@@ -82,13 +80,13 @@ package object mapper extends JavaTypeabilityHelper {
   // Enable fromGen to accept AnyRef.
   implicit def ultimateDerivation[Out, In](implicit
                                            ev: FromGen.Aux[Out, In],
-                                           inTypeable: Typeable[In]): FromAny[Out] =
+                                           inCastable: Castable[In]): FromAny[Out] =
   new FromAny[Out] {
     type In = AnyRef
 
     override def apply(in: AnyRef, typeHint: Boolean = defaultTypeHint): Option[Out] = {
       for {
-        casted <- inTypeable.cast(in)
+        casted <- inCastable.cast(in)
         res <- ev(casted, typeHint)
       } yield res
     }
