@@ -26,12 +26,12 @@ package object typebaselite {
 
   implicit val stringCodec = Codec.aux[String, String]
 
-  implicit def castFilterOp[T](t: T): CastFilterOp[T] = new CastFilterOp(t)
+  implicit def castableOps[T](t: T): CastableOps[T] = new CastableOps(t)
 
-  final class CastFilterOp[T](val t: T) extends AnyVal {
-    def to[U](implicit cast: Typeable[U]): Option[U] = cast.cast(t)
+  final class CastableOps[T](val t: T) extends AnyVal {
+    def to[U](implicit cast: Castable[U]): Option[U] = cast.cast(t)
 
-    def is[U](implicit cast: Typeable[U]): Boolean = cast.cast(t).isDefined
+    def is[U](implicit cast: Castable[U]): Boolean = cast.cast(t).isDefined
   }
 
 }
