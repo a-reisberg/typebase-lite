@@ -181,6 +181,14 @@ object FromGen extends LowPriorityFromGen {
       None
   }
 
+  implicit def optionFromGen[E, JE](implicit fromGenE: Lazy[Aux[E, JE]]): Aux[Option[E], JE] =
+    new FromGen[Option[E]] {
+      type In = JE
+
+      override def apply(in: JE, typeHint: Boolean): Option[Option[E]] =
+        Some(fromGenE.value(in, typeHint))
+    }
+
   implicit def listFromGen[E, EG](implicit
                                   fromGenE: Lazy[Aux[E, EG]],
                                   egCastable: Castable[EG]): Aux[List[E], JListInterface] =
@@ -242,26 +250,26 @@ object FromGen extends LowPriorityFromGen {
       }
     }
 
-
-  implicit def hlistRecWOptionFromGen[K <: Symbol, V, JTV, T <: HList](implicit
-                                                                       kWitness: Witness.Aux[K],
-                                                                       fromGenV: Lazy[Aux[V, JTV]],
-                                                                       jtvCastable: Castable[JTV],
-                                                                       fromGenT: Lazy[Aux[T, JMapInterface]]): Aux[FieldType[K, Option[V]] :: T, JMapInterface] =
-    new FromGen[FieldType[K, Option[V]] :: T] {
+  implicit def hlistRecWDefaultFromGen[K <: Symbol, V, JVT, T <: HList](implicit
+                                                                        kWitness: Witness.Aux[K],
+                                                                        fromGenV: Lazy[Aux[V, JVT]],
+                                                                        jtvCastable: Castable[JVT],
+                                                                        fromGenT: Lazy[Aux[T, JMapInterface]],
+                                                                        vDefault: Default[V]): Aux[FieldType[K, V] :: T, JMapInterface] =
+    new FromGen[FieldType[K, V] :: T] {
       type In = JMapInterface
 
-      override def apply(in: In, typeHint: Boolean = defaultTypeHint): Option[FieldType[K, Option[V]] :: T] = {
+      override def apply(in: JMapInterface, typeHint: Boolean): Option[FieldType[K, V] :: T] = {
         val tailOpt = fromGenT.value(in, typeHint)
 
         val headOpt = for {
           e <- Option(in.get(kWitness.value.name))
           castedE <- jtvCastable.cast(e)
           r <- fromGenV.value(castedE, typeHint)
-        } yield field[K](Some(r))
+        } yield field[K](r)
 
         headOpt match {
-          case None => tailOpt map (field[K](None) :: _)
+          case None => tailOpt map (field[K](vDefault.get()) :: _)
           case Some(head) => tailOpt map (head :: _)
         }
       }
