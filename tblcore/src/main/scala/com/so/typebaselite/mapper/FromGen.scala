@@ -24,10 +24,10 @@ trait FromGen[Out] {
 
 trait LowPriorityFromGen3 {
   // For genuine coproducts constructed by hand with :+:, i.e. not coming from apply LabelledGeneric to a trait.
-  implicit def coprodToGenNoKey[H, T <: Coproduct](implicit
-                                                   fromGenV: Lazy[FromGen.Aux[H, JMapInterface]],
-                                                   basisT: Basis[H :+: T, T],
-                                                   fromGenT: Lazy[FromGen.Aux[T, JMapInterface]]): FromGen.Aux[H :+: T, JMapInterface] =
+  implicit def coprodFromGenNoKey[H, T <: Coproduct](implicit
+                                                     fromGenV: Lazy[FromGen.Aux[H, JMapInterface]],
+                                                     basisT: Basis[H :+: T, T],
+                                                     fromGenT: Lazy[FromGen.Aux[T, JMapInterface]]): FromGen.Aux[H :+: T, JMapInterface] =
   new FromGen[H :+: T] {
     type In = JMapInterface
 
