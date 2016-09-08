@@ -141,6 +141,13 @@ case class TblDb[Doc](db: Database)(implicit docCodec: Codec.Aux[Doc, JHashMap])
     doc.getId
   }
 
+  def put[D <: Doc](fillId: String => D): D = {
+    val doc = db.createDocument()
+    val filled = fillId(doc.getId)
+    doc.putProperties(docCodec.encode(filled))
+    filled
+  }
+
   /**
     * Replace the document at the given id by the given value.
     * Create new if non existed before.
