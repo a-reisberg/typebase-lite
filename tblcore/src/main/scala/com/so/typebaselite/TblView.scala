@@ -14,11 +14,26 @@ class TblView[K, V, S](view: View)(implicit
                                    kCodec: Codec[K],
                                    vCodec: Codec[V],
                                    sCodec: Codec[S]) {
-  def apply(ks: K*): FullAux[Query, QueryRow, V] =
-    make(view.createQuery(), Seq(withKeys[K](ks: _*)))(vFromQueryRow[V])
+  def getFull(ks: K*): FullAux[Query, QueryRow, FullRow[K, V, S]] =
+    fullQuery(withKeys[K](ks: _*))
 
-  def apply[V2](ks: K*)(implicit v2Typeable: Typeable[V2]): FullAux[Query, QueryRow, V2] =
-    make(view.createQuery(), Seq(withKeys[K](ks: _*)))(vFromQueryRow[V](_).flatMap(v2Typeable.cast))
+  def getKV(ks: K*): FullAux[Query, QueryRow, KVRow[K, V]] =
+    kvQuery(withKeys[K](ks: _*))
+
+  def getKS(ks: K*): FullAux[Query, QueryRow, KSRow[K, S]] =
+    ksQuery(withKeys[K](ks: _*))
+
+  def getV(ks: K*): FullAux[Query, QueryRow, V] =
+    vQuery(withKeys[K](ks: _*))
+
+  def getV[V2](ks: K*)(implicit v2Typeable: Typeable[V2]): FullAux[Query, QueryRow, V2] =
+    vQuery(withKeys[K](ks: _*)).flatMap(v2Typeable.cast)
+
+  def getS(ks: K*): FullAux[Query, QueryRow, S] =
+    sQuery(withKeys[K](ks: _*))
+
+  def getS[S2](ks: K*)(implicit s2Typeable: Typeable[S2]): FullAux[Query, QueryRow, S2] =
+    sQuery(withKeys[K](ks: _*)).flatMap(s2Typeable.cast)
 
   def fullQuery(settings: Setting*): FullAux[Query, QueryRow, FullRow[K, V, S]] =
     make(view.createQuery, settings)(fullFromQueryRow[K, V, S])
@@ -57,13 +72,23 @@ class TblView[K, V, S](view: View)(implicit
     make(view.createQuery.toLiveQuery, settings)(sFromQueryRow[S])
 }
 
+class TblFullView[K, V, S](view: View)(implicit
+                                       kCodec: Codec[K],
+                                       vCodec: Codec[V],
+                                       sCodec: Codec[S])
+  extends TblView[K, V, S](view)(kCodec, vCodec, sCodec) {
+
+  def apply(settings: Setting*): FullAux[Query, QueryRow, FullRow[K, V, S]] =
+    fullQuery(settings: _*)
+}
+
 class TblIndexView[K, S](view: View)(implicit
                                      kCodec: Codec[K],
                                      sCodec: Codec[S])
   extends TblView[K, Empty, S](view) {
 
-  override def apply[S2](ks: K*)(implicit s2Typeable: Typeable[S2]): FullAux[Query, QueryRow, S2] =
-    make(view.createQuery(), Seq(withKeys[K](ks: _*)))(sFromQueryRow[S](_).flatMap(s2Typeable.cast))
+  def apply(settings: Setting*): FullAux[Query, QueryRow, S] =
+    sQuery(settings: _*)
 }
 
 class TblTypeView[S](view: View)(implicit sCodec: Codec[S])

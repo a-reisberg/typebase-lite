@@ -30,23 +30,18 @@ object LaunchDemo extends App {
   val sf = Address("San Francisco", "13324")
 
   // and some random employees
-  val john = Employee("John Doe", 35, ny1)
-  val jamie = Employee("Jamie Saunders", 25, ny2)
-  val bradford = Employee("Bradford Newton", 30, chicago)
-  val tina = Employee("Tina Rivera", 23, sf)
-  val whitney = Employee("Whitney Perez", 40, sf)
 
   // Now add employees to the db
-  val johnId = tblDb.put(john)
-  val jamieId = tblDb.put(jamie)
-  val bradfordId = tblDb.put(bradford)
-  val tinaId = tblDb.put(tina)
-  val whitneyId = tblDb.put(whitney)
+  val john = tblDb.put(Employee(_, "John Doe", 35, ny1))
+  val jamie = tblDb.put(Employee(_, "Jamie Saunders", 25, ny2))
+  val bradford = tblDb.put(Employee(_, "Bradford Newton", 30, chicago))
+  val tina = tblDb.put(Employee(_, "Tina Rivera", 23, sf))
+  val whitney = tblDb.put(Employee(_, "Whitney Perez", 40, sf))
 
   // Now create the departments
-  val saleDept = Department("Sale", List(johnId, jamieId))
-  val hr = Department("HR", List(bradfordId))
-  val customerSupp = Department("Customer Support", List(tinaId, whitneyId))
+  val saleDept = Department("Sale", List(john._id, jamie._id))
+  val hr = Department("HR", List(bradford._id))
+  val customerSupp = Department("Customer Support", List(tina._id, whitney._id))
 
   // Now insert departments to the Db
   val saleDeptId = tblDb.put(saleDept)
@@ -55,7 +50,7 @@ object LaunchDemo extends App {
 
   // Get some departments out of Db
   printSection("Get sale dept and hr dept")
-  println(tblDb[Department](saleDeptId, hrId))
+  println(tblDb.get[Department](saleDeptId, hrId))
 
   // Query all departments.
   // typeView is a view created automatically by typebase lite.
@@ -76,7 +71,7 @@ object LaunchDemo extends App {
   printSection("Department name, along with List of employee names")
   val deptEmployeeQ = for {
     dept <- deptQ
-    employeeNames = tblDb[Employee](dept.employeeIds: _*).map(_.name)
+    employeeNames = tblDb.get[Employee](dept.employeeIds: _*).map(_.name)
   } yield (dept.name, employeeNames)
 
   deptEmployeeQ.foreach(println)
@@ -95,13 +90,13 @@ object LaunchDemo extends App {
   // First, create TblView. The key of the index is String (for city) and Int (for age).
   // More general MapViews and also be created via createMapView. Map-Reduce will come soon.
   printSection("Same query, but with index")
-  val cityAgeIndex = tblDb.createIndexView[String :: Int :: HNil]("city-age", "1.0", {
+  val cityAgeIndex = tblDb.createIndex[String :: Int :: HNil]("city-age", "1.0", {
     case e: Employee => Set(e.address.city :: e.age :: HNil)
     case _ => Set()
   })
 
   // Now, we create a query using the index. This Query can also be mixed with others, using various combinators.
-  val cityAgeQ2 = cityAgeIndex.sQuery(startKey("New York" :: 30 :: HNil), endKey("New York" :: Last))
+  val cityAgeQ2 = cityAgeIndex(startKey("New York" :: 30 :: HNil), endKey("New York" :: Last))
 
   cityAgeQ2.foreach(println)
 
@@ -112,7 +107,7 @@ object LaunchDemo extends App {
   val subscription = liveQ.subscribe(_.foreach(println))
   liveQ.start()
 
-  tblDb.put(Employee("New Comer", 31, Address("New York", "99999")))
+  tblDb.put(Employee(_, "New Comer", 31, Address("New York", "99999")))
 
   StdIn.readLine("\n***** Press Enter to unsubscribe! *****") // Wait a bit
 
@@ -120,7 +115,7 @@ object LaunchDemo extends App {
   subscription.dispose()
 
   printSection("Someone new just joined us, but noone gets notified because we already unsubscribed")
-  tblDb.put(Employee("New Comer2", 31, Address("New York", "99999"))) // should print out nothing
+  tblDb.put(Employee(_, "New Comer2", 31, Address("New York", "99999"))) // should print out nothing
 
   StdIn.readLine("\n***** Press Enter to stop the live query! *****")
   liveQ.stop()

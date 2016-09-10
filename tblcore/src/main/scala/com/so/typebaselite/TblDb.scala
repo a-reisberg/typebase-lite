@@ -19,7 +19,7 @@ import scala.util.control.NonFatal
 /**
   * Wrapper for Couchbase lite's database object.
   *
-  * @param db Couchbase lite's database object
+  * @param db       Couchbase lite's database object
   * @param docCodec [[Codec]] to encode/decode [[Doc]] to/from [[JHashMap]]
   * @tparam Doc type of the parsed document
   */
@@ -37,41 +37,30 @@ case class TblDb[Doc](db: Database)(implicit docCodec: Codec.Aux[Doc, JHashMap])
     * The default query. Used internally by the api.
     * End users should use query() instead
     */
-  val defaultQuery: FullAux[Query, QueryRow, FullRow[String, QueryDocInfo, Doc]] =
-    query()
+  val defaultQuery: FullAux[Query, QueryRow, FullRow[String, QueryDocInfo, Doc]] = query()
 
-  /**
-    * Get [[Seq[Doc]]] from a sequence of ids.
-    *
-    * @param ids Sequence of ids
-    * @return Sequence of [[Doc]]'s
-    */
-  def apply(ids: String*): Seq[Doc] = get(ids: _*)
-
-  /**
-    * Overloaded version, which automatically casts to [[D]].
-    *
-    * @param ids Sequence of ids
-    * @param dTypeable Shapeless' typeclass to provide safe casting
-    * @tparam D Type of the final result
-    * @return Sequence of [[D]]'s.
-    */
-  def apply[D <: Doc](ids: String*)(implicit dTypeable: Typeable[D]): Seq[D] = getType(ids: _*)
+  def apply(settings: Setting*): FullAux[Query, QueryRow, FullRow[String, QueryDocInfo, Doc]] =
+    query(settings: _*)
 
   /**
     * Create a query of all documents
     *
     * @param settings Extra settings for this query. See [[Setting]].
     * @return [[TblQuery[FullRow[String, QueryDocInfo, Doc]]]] (the Aux thing is a type refinement)
-    */
+    **/
   def query(settings: Setting*): FullAux[Query, QueryRow, FullRow[String, QueryDocInfo, Doc]] =
-    make[Query, FullRow[String, QueryDocInfo, Doc]](db.createAllDocumentsQuery(), settings)(fullFromQueryRow[String, QueryDocInfo, Doc])
+  make[Query, FullRow[String, QueryDocInfo, Doc]](db.createAllDocumentsQuery(), settings)(fullFromQueryRow[String, QueryDocInfo, Doc])
 
   /**
     * Same as [[apply(ids)]] above
     */
-  def get(ids: String*): Seq[Doc] =
-    ids.flatMap(key => Option(db.getDocument(key)).map(_.getProperties) flatMap docCodec.decode)
+  def get(ids: String*): Seq[Doc] = getHelper(ids: _*)
+
+  /**
+    * Same as [[apply[D](ids)]]
+    */
+  def get[D <: Doc](ids: String*)(implicit dTypeable: Typeable[D]): Seq[D] =
+  getHelper(ids: _*) flatMap dTypeable.cast
 
   /**
     * Get both the Couchbase's document and the parsed document
@@ -89,11 +78,8 @@ case class TblDb[Doc](db: Database)(implicit docCodec: Codec.Aux[Doc, JHashMap])
     */
   def getRaw(ids: String*): Seq[Document] = ids.flatMap(key => Option(db.getDocument(key)))
 
-  /**
-    * Same as [[apply[D](ids)]]
-    */
-  def getType[D <: Doc](ids: String*)(implicit dTypeable: Typeable[D]): Seq[D] =
-    get(ids: _*) flatMap dTypeable.cast
+  def getHelper(ids: String*): Seq[Doc] =
+    ids.flatMap(key => Option(db.getDocument(key)).map(_.getProperties) flatMap docCodec.decode)
 
   /**
     * Delete the document with the given id.
@@ -111,7 +97,7 @@ case class TblDb[Doc](db: Database)(implicit docCodec: Codec.Aux[Doc, JHashMap])
   /**
     * Add a [[Doc]] to the db using the given id.
     *
-    * @param id Provided id
+    * @param id    Provided id
     * @param value Provided value
     * @param overwrite
     * @return True if succeeded, false otherwise
@@ -152,7 +138,7 @@ case class TblDb[Doc](db: Database)(implicit docCodec: Codec.Aux[Doc, JHashMap])
     * Replace the document at the given id by the given value.
     * Create new if non existed before.
     *
-    * @param id Provided id
+    * @param id    Provided id
     * @param value Provided value
     */
   def update(id: String, value: Doc): Unit = {
@@ -170,7 +156,7 @@ case class TblDb[Doc](db: Database)(implicit docCodec: Codec.Aux[Doc, JHashMap])
     * Add change listener to the document with the given id
     *
     * @param id Provided id
-    * @param f Callback function when the document changes
+    * @param f  Callback function when the document changes
     * @tparam U Return type of f
     * @return Some(subscription) if succeeded, Non otherwise.
     */
@@ -212,14 +198,14 @@ case class TblDb[Doc](db: Database)(implicit docCodec: Codec.Aux[Doc, JHashMap])
     * Create an index (i.e. View) with the provided name, version, and mapper.
     * This View has empty body (hence, just forward to the source document when query).
     *
-    * @param name Provided name for the view
+    * @param name    Provided name for the view
     * @param version Provided version of the view
-    * @param mapper Function to create a set of keys [[K]] that should be emitted on a given [[Doc]]
-    * @param kCodec Codec used to encode [[K]]
+    * @param mapper  Function to create a set of keys [[K]] that should be emitted on a given [[Doc]]
+    * @param kCodec  Codec used to encode [[K]]
     * @tparam K Type of the keys
     * @return A [[TblIndexView[K, Doc]]]
     */
-  def createIndexView[K](name: String, version: String, mapper: Doc => Set[K])(implicit kCodec: Codec[K]): TblIndexView[K, Doc] = {
+  def createIndex[K](name: String, version: String, mapper: Doc => Set[K])(implicit kCodec: Codec[K]): TblIndexView[K, Doc] = {
     val view = db.getView(name)
 
     view.setMap(new Mapper {
@@ -233,15 +219,33 @@ case class TblDb[Doc](db: Database)(implicit docCodec: Codec.Aux[Doc, JHashMap])
     new TblIndexView(view)
   }
 
+  def createIndex[K, D](name: String, version: String, mapper: Doc => Set[K])(implicit
+                                                                              kCodec: Codec[K],
+                                                                              dCodec: Codec[D],
+                                                                              dTypeable: Typeable[D]): TblIndexView[K, D] = {
+    val view = db.getView(name)
+
+    view.setMap(new Mapper {
+      override def map(document: util.Map[String, AnyRef], emitter: Emitter): Unit = {
+        for (doc <- docCodec.decode(document))
+          if (dTypeable.cast(doc).isDefined)
+            for (k <- mapper(doc))
+              emitter.emit(kCodec.encode(k), TblDb.emptyMap)
+      }
+    }, version)
+
+    new TblIndexView(view)
+  }
+
   /**
-    * Similar to the [[createIndexView()]], except that now, we can specify which document it should redirect to.
+    * Similar to the [[createIndex()]], except that now, we can specify which document it should redirect to.
     *
-    * @param name Provided name of for the view
+    * @param name    Provided name of for the view
     * @param version Provided version of the vew
-    * @param mapper Function to create a set of [[(K, String)]],
-    *               where [[K]] is the key of the index
-    *               and [[String]] is the id of the document that should be redirected to
-    * @param kCodec Codec used to encode [[K]]
+    * @param mapper  Function to create a set of [[(K, String)]],
+    *                where [[K]] is the key of the index
+    *                and [[String]] is the id of the document that should be redirected to
+    * @param kCodec  Codec used to encode [[K]]
     * @tparam K Type of the keys
     * @return A [[TblIndexView[K, Doc]]]
     */
@@ -259,22 +263,39 @@ case class TblDb[Doc](db: Database)(implicit docCodec: Codec.Aux[Doc, JHashMap])
     new TblIndexView(view)
   }
 
+  def createRedirectView[K, D](name: String, version: String, mapper: Doc => Set[(K, String)])(implicit
+                                                                                               kCodec: Codec[K],
+                                                                                               dCodec: Codec[D]): TblIndexView[K, D] = {
+    val view = db.getView(name)
+
+    view.setMap(new Mapper {
+      override def map(document: util.Map[String, AnyRef], emitter: Emitter): Unit = {
+        for (doc <- docCodec.decode(document))
+          for ((k, id) <- mapper(doc))
+            if (dCodec.decode(db.getDocument(id).getProperties).isDefined)
+              emitter.emit(kCodec.encode(k), TblDb.redirectMap(id))
+      }
+    }, version)
+
+    new TblIndexView(view)
+  }
+
   /**
     * Most general MapView creation facility
     *
-    * @param name Provided name for the view
+    * @param name    Provided name for the view
     * @param version Provided version of the view
-    * @param mapper Function to create a set of keys (of type [[K]]) and values (of type [[V]])
-    *               to be emitted
-    * @param kCodec Codec to encode [[K]]
-    * @param vCodec Codec to encode [[V]]
+    * @param mapper  Function to create a set of keys (of type [[K]]) and values (of type [[V]])
+    *                to be emitted
+    * @param kCodec  Codec to encode [[K]]
+    * @param vCodec  Codec to encode [[V]]
     * @tparam K Type of keys
     * @tparam V Type of values
-    * @return A [[TblView[K, V, Doc]]]
+    * @return A [[TblFullView[K, V, Doc]]]
     */
   def createMapView[K, V](name: String, version: String, mapper: Doc => Set[(K, V)])(implicit
                                                                                      kCodec: Codec[K],
-                                                                                     vCodec: Codec[V]): TblView[K, V, Doc] = {
+                                                                                     vCodec: Codec[V]): TblFullView[K, V, Doc] = {
     val view = db.getView(name)
 
     view.setMap(new Mapper {
@@ -285,23 +306,31 @@ case class TblDb[Doc](db: Database)(implicit docCodec: Codec.Aux[Doc, JHashMap])
       }
     }, version)
 
-    new TblView(view)
+    new TblFullView(view)
   }
 
   /**
     * Get an existing vew by the given name
     *
-    * @param name Provided name of the view
+    * @param name   Provided name of the view
     * @param kCodec Codec for [[K]]
     * @param vCodec Codec for [[V]]
     * @tparam K Type of keys
     * @tparam V Type of values
-    * @return A [[TblView[K, String, Doc]]] (Option)
+    * @return A [[TblFullView[K, String, Doc]]] (Option)
     */
-  def getExistingView[K, V](name: String)(implicit
-                                          kCodec: Codec[K],
-                                          vCodec: Codec[V]): Option[TblView[K, String, Doc]] =
-    Option(db.getExistingView(name)) map (new TblView(_))
+  def getView[K, V](name: String)(implicit
+                                  kCodec: Codec[K],
+                                  vCodec: Codec[V]): Option[TblFullView[K, String, Doc]] =
+  Option(db.getExistingView(name)) map (new TblFullView(_))
+
+  def getIndex[K](name: String)(implicit kCodec: Codec[K]): Option[TblIndexView[K, Doc]] =
+    Option(db.getExistingView(name)) map (new TblIndexView(_))
+
+  def getIndex[K, D](name: String)(implicit
+                                   kCodec: Codec[K],
+                                   dCodec: Codec[D]): Option[TblIndexView[K, D]] =
+    Option(db.getExistingView(name)) map (new TblIndexView(_))
 
   // Implementing TblQuery.FullAux[Query, QueryRow, FullRow[String, QueryDocInfo, Doc]]
   override type S = Query
@@ -323,7 +352,7 @@ object TblDb {
     * @return A Map which only contains Couchbase lite's properties
     */
   def getCbProperties(document: Document): Map[String, AnyRef] =
-    document.getProperties.asScala.filter(_._1.startsWith("_"))
+  document.getProperties.asScala.filter(_._1.startsWith("_"))
 
   val emptyMap: util.HashMap[String, AnyRef] = new util.HashMap[String, AnyRef]()
 
