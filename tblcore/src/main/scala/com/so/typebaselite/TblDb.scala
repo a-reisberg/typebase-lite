@@ -59,7 +59,7 @@ case class TblDb[Doc](db: Database)(implicit docCodec: Codec.Aux[Doc, JHashMap])
   /**
     * Same as [[apply[D](ids)]]
     */
-  def get[D <: Doc](ids: String*)(implicit dTypeable: Typeable[D]): List[D] =
+  def getType[D <: Doc](ids: String*)(implicit dTypeable: Typeable[D]): List[D] =
   getHelper(ids: _*) flatMap dTypeable.cast
 
   /**

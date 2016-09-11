@@ -1,10 +1,9 @@
 package com.so.typebaselite
 
-import com.couchbase.lite.{LiveQuery, Query, QueryRow, View}
+import com.couchbase.lite._
 import com.so.typebaselite.TblQuery._
 import com.so.typebaselite.TblRow._
-import com.so.typebaselite.mapper.{Codec, NameHelper}
-import shapeless.Typeable
+import com.so.typebaselite.mapper._
 
 
 /**
@@ -26,14 +25,8 @@ class TblView[K, V, S](view: View)(implicit
   def getV(ks: K*): FullAux[Query, QueryRow, V] =
     vQuery(withKeys[K](ks: _*))
 
-  def getV[V2](ks: K*)(implicit v2Typeable: Typeable[V2]): FullAux[Query, QueryRow, V2] =
-    vQuery(withKeys[K](ks: _*)).flatMap(v2Typeable.cast)
-
   def getS(ks: K*): FullAux[Query, QueryRow, S] =
     sQuery(withKeys[K](ks: _*))
-
-  def getS[S2](ks: K*)(implicit s2Typeable: Typeable[S2]): FullAux[Query, QueryRow, S2] =
-    sQuery(withKeys[K](ks: _*)).flatMap(s2Typeable.cast)
 
   def fullQuery(settings: Setting*): FullAux[Query, QueryRow, FullRow[K, V, S]] =
     make(view.createQuery, settings)(fullFromQueryRow[K, V, S])

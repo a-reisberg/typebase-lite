@@ -50,7 +50,7 @@ object LaunchDemo extends App {
 
   // Get some departments out of Db
   printSection("Get sale dept and hr dept")
-  println(tblDb.get[Department](saleDeptId, hrId))
+  println(tblDb.getType[Department](saleDeptId, hrId))
 
   // Query all departments.
   // typeView is a view created automatically by typebase lite.
@@ -71,7 +71,7 @@ object LaunchDemo extends App {
   printSection("Department name, along with List of employee names")
   val deptEmployeeQ = for {
     dept <- deptQ
-    employeeNames = tblDb.get[Employee](dept.employeeIds: _*).map(_.name)
+    employeeNames = tblDb.getType[Employee](dept.employeeIds: _*).map(_.name)
   } yield (dept.name, employeeNames)
 
   deptEmployeeQ.foreach(println)
