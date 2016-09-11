@@ -54,12 +54,12 @@ case class TblDb[Doc](db: Database)(implicit docCodec: Codec.Aux[Doc, JHashMap])
   /**
     * Same as [[apply(ids)]] above
     */
-  def get(ids: String*): Seq[Doc] = getHelper(ids: _*)
+  def get(ids: String*): List[Doc] = getHelper(ids: _*)
 
   /**
     * Same as [[apply[D](ids)]]
     */
-  def get[D <: Doc](ids: String*)(implicit dTypeable: Typeable[D]): Seq[D] =
+  def get[D <: Doc](ids: String*)(implicit dTypeable: Typeable[D]): List[D] =
   getHelper(ids: _*) flatMap dTypeable.cast
 
   /**
@@ -68,7 +68,7 @@ case class TblDb[Doc](db: Database)(implicit docCodec: Codec.Aux[Doc, JHashMap])
     * @param ids Sequence of ids
     * @return A Sequence of Document, along with possible parsed [[Doc]].
     */
-  def getFull(ids: String*): Seq[(Option[Doc], Document)] = getRaw(ids: _*).map(doc => (docCodec.decode(doc), doc))
+  def getFull(ids: String*): List[(Option[Doc], Document)] = getRaw(ids: _*).map(doc => (docCodec.decode(doc), doc))
 
   /**
     * Get the raw document.
@@ -76,10 +76,10 @@ case class TblDb[Doc](db: Database)(implicit docCodec: Codec.Aux[Doc, JHashMap])
     * @param ids Sequence of ids
     * @return Sequence of [[Document]]'s
     */
-  def getRaw(ids: String*): Seq[Document] = ids.flatMap(key => Option(db.getDocument(key)))
+  def getRaw(ids: String*): List[Document] = ids.toList.flatMap(key => Option(db.getDocument(key)))
 
-  def getHelper(ids: String*): Seq[Doc] =
-    ids.flatMap(key => Option(db.getDocument(key)).map(_.getProperties) flatMap docCodec.decode)
+  def getHelper(ids: String*): List[Doc] =
+    ids.toList.flatMap(key => Option(db.getDocument(key)).map(_.getProperties) flatMap docCodec.decode)
 
   /**
     * Delete the document with the given id.
