@@ -4,6 +4,7 @@ import java.util
 
 import com.couchbase.lite.{Query, QueryRow}
 import com.so.typebaselite.mapper._
+import shapeless.Typeable
 
 import scala.collection.JavaConverters._
 import scala.collection.generic.CanBuildFrom
@@ -83,6 +84,9 @@ trait TblQuery[A] {
 
   def dropWhile(p: A => Boolean): FullAux[S, E, A] =
     lift(_.dropWhile(p))
+
+  def just[B](implicit bTypeable: Typeable[B]): FullAux[S, E, B] =
+    lift(_.flatMap(bTypeable.cast(_)))
 
   def hasDefiniteSize: Boolean = false
 
