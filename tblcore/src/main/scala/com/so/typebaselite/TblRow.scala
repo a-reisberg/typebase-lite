@@ -2,58 +2,17 @@ package com.so.typebaselite
 
 import com.couchbase.lite.{Document, QueryRow}
 import com.so.typebaselite.mapper.Codec
-import shapeless.Typeable
 
 /**
   * Created by a.reisberg on 8/31/2016.
   */
 sealed trait TblRow
 
-case class KSRow[K, S](k: K, src: S, srcId: String, srcDoc: Document) extends TblRow {
-  def kIs[K2 <: K](implicit k2Typeable: Typeable[K2]): Option[KSRow[K2, S]] =
-    for (k2 <- k2Typeable.cast(k))
-      yield KSRow(k2, src, srcId, srcDoc)
+case class KSRow[K, S](k: K, src: S, srcId: String, srcDoc: Document) extends TblRow
 
-  def sIs[S2 <: S](implicit s2Typeable: Typeable[S2]): Option[KSRow[K, S2]] =
-    for (src2 <- s2Typeable.cast(src))
-      yield KSRow(k, src2, srcId, srcDoc)
-}
+case class KVRow[K, V](k: K, v: V, srcId: String) extends TblRow
 
-case class KVRow[K, V](k: K, v: V, srcId: String) extends TblRow {
-  def kIs[K2 <: K](implicit k2Typeable: Typeable[K2]): Option[KVRow[K2, V]] =
-    for (k2 <- k2Typeable.cast(k))
-      yield KVRow(k2, v, srcId)
-
-  def vIs[V2 <: V](implicit v2Typeable: Typeable[V2]): Option[KVRow[K, V2]] =
-    for (v2 <- v2Typeable.cast(v))
-      yield KVRow(k, v2, srcId)
-}
-
-case class FullRow[K, V, S](k: K, v: V, src: S, srcId: String, srcDoc: Document) extends TblRow {
-  def kIs[K2 <: K](implicit k2Typeable: Typeable[K2]): Option[FullRow[K2, V, S]] =
-    for (k2 <- k2Typeable.cast(k))
-      yield FullRow(k2, v, src, srcId, srcDoc)
-
-  def vIs[V2 <: V](implicit k2Typeable: Typeable[V2]): Option[FullRow[K, V2, S]] =
-    for (v2 <- k2Typeable.cast(v))
-      yield FullRow(k, v2, src, srcId, srcDoc)
-
-  def sIs[S2 <: S](implicit s2Typeable: Typeable[S2]): Option[FullRow[K, V, S2]] =
-    for (src2 <- s2Typeable.cast(src))
-      yield FullRow(k, v, src2, srcId, srcDoc)
-
-  def toKVRow[K2, V2](implicit k2Typeable: Typeable[K2], v2Typeable: Typeable[V2]): Option[KVRow[K2, V2]] =
-    for {
-      k2 <- k2Typeable.cast(k)
-      v2 <- v2Typeable.cast(v)
-    } yield KVRow(k2, v2, srcId)
-
-  def toKSRow[K2, S2](implicit k2Typeable: Typeable[K2], s2Typeable: Typeable[S2]): Option[KSRow[K2, S2]] =
-    for {
-      k2 <- k2Typeable.cast(k)
-      src2 <- s2Typeable.cast(src)
-    } yield KSRow(k2, src2, srcId, srcDoc)
-}
+case class FullRow[K, V, S](k: K, v: V, src: S, srcId: String, srcDoc: Document) extends TblRow
 
 object TblRow {
   def fullFromQueryRow[K, V, S](row: QueryRow)(implicit
