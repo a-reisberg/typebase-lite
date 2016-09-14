@@ -54,7 +54,7 @@ object LaunchDemo extends App {
 
   // Query all departments.
   // typeView is a view created automatically by typebase lite.
-  // deptQ just build the query, and doesn't run it yet. So one can reuse it in the future.
+  // deptQ extract build the query, and doesn't run it yet. So one can reuse it in the future.
   val deptQ = tblDb.typeView[Department]
 
   // Now, run the query.
@@ -96,14 +96,14 @@ object LaunchDemo extends App {
   })
 
   // Now, we create a query using the index. This Query can also be mixed with others, using various combinators.
-  val cityAgeQ2 = cityAgeIndex(startKey("New York" :: 30 :: HNil), endKey("New York" :: Last))
+  val cityAgeQ2 = cityAgeIndex(startKey("New York" :: 30 :: HNil), endKey("New York" :: Last)).extract[Employee]
 
   cityAgeQ2.foreach(println)
 
   // Live queries are also supported. Now we want to be notified
   // whenever someone from New York, whose age is > 30 starts at our company.
   printSection("Live query: anyone new of age > 30 from NY?")
-  val liveQ = cityAgeIndex.sLiveQuery(startKey("New York" :: 30 :: HNil), endKey("New York" :: Last)).flatMap(_.to[Employee])
+  val liveQ = cityAgeIndex.sLiveQuery(startKey("New York" :: 30 :: HNil), endKey("New York" :: Last)).extract[Employee]
   val subscription = liveQ.subscribe(_.foreach(println))
   liveQ.start()
 
@@ -114,7 +114,7 @@ object LaunchDemo extends App {
   // Unsubscribe
   subscription.dispose()
 
-  printSection("Someone new just joined us, but noone gets notified because we already unsubscribed")
+  printSection("Someone new extract joined us, but noone gets notified because we already unsubscribed")
   tblDb.put(Employee(_, "New Comer2", 31, Address("New York", "99999"))) // should print out nothing
 
   StdIn.readLine("\n***** Press Enter to stop the live query! *****")

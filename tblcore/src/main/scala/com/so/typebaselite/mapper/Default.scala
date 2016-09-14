@@ -1,5 +1,7 @@
 package com.so.typebaselite.mapper
 
+import shapeless.labelled._
+
 /**
   * Created by a.reisberg on 9/7/2016.
   */
@@ -26,5 +28,10 @@ object Default {
   implicit def defaultMap[K, V]: Default[Map[K, V]] =
     new Default[Map[K, V]] {
       override def get(): Map[K, V] = Map.empty[K, V]
+    }
+
+  implicit def defaultWKey[K <: Symbol, V](implicit vDefault: Default[V]): Default[FieldType[K, V]] =
+    new Default[FieldType[K, V]] {
+      override def get(): FieldType[K, V] = field[K](vDefault.get())
     }
 }
