@@ -72,6 +72,31 @@ object Extract extends LowPriorityExtract {
       override def apply(t: T): Option[Option[T]] = Some(Some(t))
     }
 
+  implicit def extractList[T1, T2](implicit t1tot2: Extract[T1, T2]): Extract[List[T1], List[T2]] =
+    new Extract[List[T1], List[T2]] {
+      override def apply(t: List[T1]): Option[List[T2]] =
+        Some(t.flatMap(t1tot2(_)))
+    }
+
+  implicit def extractSet[T1, T2](implicit t1tot2: Extract[T1, T2]): Extract[Set[T1], Set[T2]] =
+    new Extract[Set[T1], Set[T2]] {
+      override def apply(t: Set[T1]): Option[Set[T2]] =
+        Some(t.flatMap(t1tot2(_)))
+    }
+
+  implicit def extractMap[K1, V1, K2, V2](implicit
+                                          k1tok2: Extract[K1, K2],
+                                          v1tov2: Extract[V1, V2]): Extract[Map[K1, V1], Map[K2, V2]] =
+    new Extract[Map[K1, V1], Map[K2, V2]] {
+      override def apply(t: Map[K1, V1]): Option[Map[K2, V2]] =
+        Some(t.flatMap { case (k, v) =>
+          for {
+            k2 <- k1tok2(k)
+            v2 <- v1tov2(v)
+          } yield (k2, v2)
+        })
+    }
+
   implicit def extractHNil[T]: Extract[T, HNil] = new Extract[T, HNil] {
     override def apply(t: T): Option[HNil] = Some(HNil)
   }
