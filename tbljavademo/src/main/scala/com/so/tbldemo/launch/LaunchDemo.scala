@@ -54,7 +54,7 @@ object LaunchDemo extends App {
 
   // Query all departments.
   // typeView is a view created automatically by typebase lite.
-  // deptQ extract build the query, and doesn't run it yet. So one can reuse it in the future.
+  // deptQ just builds the query, and doesn't run it yet. So one can reuse it in the future.
   val deptQ = tblDb.typeView[Department]
 
   // Now, run the query.
@@ -114,7 +114,7 @@ object LaunchDemo extends App {
   // Unsubscribe
   subscription.dispose()
 
-  printSection("Someone new extract joined us, but noone gets notified because we already unsubscribed")
+  printSection("Someone new just joined us, but noone gets notified because we already unsubscribed")
   tblDb.put(Employee(_, "New Comer2", 31, Address("New York", "99999"))) // should print out nothing
 
   StdIn.readLine("\n***** Press Enter to stop the live query! *****")

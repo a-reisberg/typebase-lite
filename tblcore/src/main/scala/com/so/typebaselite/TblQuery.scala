@@ -22,7 +22,7 @@ trait TblQuery[A] {
   type S
 
   // Type of elements in the source. If coming from Scala's collections,
-  // for eg. List[A], then E is extract A. If this comes from Couchbase lite,
+  // for eg. List[A], then E is just A. If this comes from Couchbase lite,
   // then it would be of type QueryRow.
   type E
 
@@ -35,7 +35,7 @@ trait TblQuery[A] {
   // This isn't very efficient since it will ignore the results inside
   // ChangeEvent and re-runs the query instead. The listener is only used
   // as a signaling device without any data.  This is because the abstraction
-  // used in TblQuery (the apply function) doesn't allow apply to be
+  // used in TblQuery (the transform function) doesn't allow transform to be
   // applied to a row enumerator. But it shouldn't be too bad.
   def subscribe(f: Stream[A] => Unit)(implicit ev: Subscribable.Aux[S, Stream[E]]): Subscription =
   ev.subscribe(source)(es => f(transform(es)))
@@ -119,7 +119,7 @@ object TblQuery {
   }
 
   // Construct a query out of a value of type S and a transformation of S to Iterable[A].
-  // s will be evaluated strictly: put into the source and ev is in the apply
+  // s will be evaluated strictly: put into the source and ev is in the transform
   // Main audience of this is to convert from Scala's collections.
   def apply[S0, A](s: S0)(implicit f: S0 => Iterable[A]): FullAux[S0, A, A] = apply[S0, A, A](s, identity[Stream[A]])(f)
 
@@ -127,7 +127,7 @@ object TblQuery {
     *
     * @param s      The source, either a Scala's collection or a Couchbase lite's Query.
     *               If it's the former, use the other overloaded version of [[apply()]] for simplicitly.
-    * @param transf Function providing apply to the target type (from Couchbase lite's Query).
+    * @param transf Function providing transformation to the target type (from Couchbase lite's Query).
     * @param ev     Convert to Iterable (no more extra processing, for eg. parsing)
     * @tparam S0 Type of the provide source s
     * @tparam E0 Type of each element in the resulting conversion to Iterable by ev.
