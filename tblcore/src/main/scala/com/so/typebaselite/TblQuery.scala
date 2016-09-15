@@ -4,7 +4,6 @@ import java.util
 
 import com.couchbase.lite.{Query, QueryRow}
 import com.so.typebaselite.mapper._
-import shapeless.Typeable
 
 import scala.collection.JavaConverters._
 import scala.collection.generic.CanBuildFrom
@@ -76,8 +75,14 @@ trait TblQuery[A] {
   def drop(n: Int): FullAux[S, E, A] =
     lift(_.drop(n))
 
-  def reduce(op: (A, A) => A): FullAux[S, E, A] =
+  def reduce[A1 >: A](op: (A1, A1) => A1): FullAux[S, E, A1] =
     lift(st => Stream(st.reduce(op)))
+
+  def foldLeft[B](z: B)(op: (B, A) => B): FullAux[S, E, B] =
+    lift(st => Stream(st.foldLeft(z)(op)))
+
+  def foldRight[B](z: B)(op: (A, B) => B): FullAux[S, E, B] =
+    lift(st => Stream(st.foldRight(z)(op)))
 
   def takeWhile(p: A => Boolean): FullAux[S, E, A] =
     lift(_.takeWhile(p))
