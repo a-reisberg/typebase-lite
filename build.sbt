@@ -1,5 +1,3 @@
-name := "typebase-lite"
-
 scalaVersion := "2.11.8"
 
 // scalacOptions ++= Seq("-Xlog-implicits")

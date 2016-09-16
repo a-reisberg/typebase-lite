@@ -26,6 +26,7 @@ import scala.util.control.NonFatal
 case class TblDb[Doc](db: Database)(implicit docCodec: Codec.Aux[Doc, JHashMap])
   extends TblQuery[FullRow[String, QueryDocInfo, Doc]] {
 
+  import TblDb._
   import TblQuery._
 
   /**
@@ -108,7 +109,7 @@ case class TblDb[Doc](db: Database)(implicit docCodec: Codec.Aux[Doc, JHashMap])
     if (properties != null && overwrite) false
     else
       try {
-        doc.putProperties(docCodec.encode(value))
+        doc.putProperties(removeCbProperties(docCodec.encode(value)))
         true
       } catch {
         case NonFatal(t) => false
@@ -123,14 +124,14 @@ case class TblDb[Doc](db: Database)(implicit docCodec: Codec.Aux[Doc, JHashMap])
     */
   def put(value: Doc): String = {
     val doc = db.createDocument()
-    doc.putProperties(docCodec.encode(value))
+    doc.putProperties(removeCbProperties(docCodec.encode(value)))
     doc.getId
   }
 
   def put[D <: Doc](fillId: String => D): D = {
     val doc = db.createDocument()
     val filled = fillId(doc.getId)
-    doc.putProperties(docCodec.encode(filled))
+    doc.putProperties(removeCbProperties(docCodec.encode(filled)))
     filled
   }
 
@@ -146,7 +147,7 @@ case class TblDb[Doc](db: Database)(implicit docCodec: Codec.Aux[Doc, JHashMap])
 
     doc.update(new DocumentUpdater {
       override def update(newRevision: UnsavedRevision): Boolean = {
-        newRevision.setUserProperties(docCodec.encode(value))
+        newRevision.setUserProperties(removeCbProperties(docCodec.encode(value)))
         true
       }
     })
@@ -187,7 +188,7 @@ case class TblDb[Doc](db: Database)(implicit docCodec: Codec.Aux[Doc, JHashMap])
       override def map(document: util.Map[String, AnyRef], emitter: Emitter): Unit = {
         val typeHint = document.get(typeHintKey)
         if (typeHint != null && typeHint.isInstanceOf[String])
-          emitter.emit(typeHint.asInstanceOf[String], TblDb.emptyMap)
+          emitter.emit(typeHint.asInstanceOf[String], emptyMap)
       }
     }, "0.1")
 
@@ -212,7 +213,7 @@ case class TblDb[Doc](db: Database)(implicit docCodec: Codec.Aux[Doc, JHashMap])
       override def map(document: util.Map[String, AnyRef], emitter: Emitter): Unit = {
         for (doc <- docCodec.decode(document))
           for (k <- mapper(doc))
-            emitter.emit(kCodec.encode(k), TblDb.emptyMap)
+            emitter.emit(kCodec.encode(k), emptyMap)
       }
     }, version)
 
@@ -230,7 +231,7 @@ case class TblDb[Doc](db: Database)(implicit docCodec: Codec.Aux[Doc, JHashMap])
         for (doc <- docCodec.decode(document))
           if (dTypeable.cast(doc).isDefined)
             for (k <- mapper(doc))
-              emitter.emit(kCodec.encode(k), TblDb.emptyMap)
+              emitter.emit(kCodec.encode(k), emptyMap)
       }
     }, version)
 
@@ -256,7 +257,7 @@ case class TblDb[Doc](db: Database)(implicit docCodec: Codec.Aux[Doc, JHashMap])
       override def map(document: util.Map[String, AnyRef], emitter: Emitter): Unit = {
         for (doc <- docCodec.decode(document))
           for ((k, id) <- mapper(doc))
-            emitter.emit(kCodec.encode(k), TblDb.redirectMap(id))
+            emitter.emit(kCodec.encode(k), redirectMap(id))
       }
     }, version)
 
@@ -273,7 +274,7 @@ case class TblDb[Doc](db: Database)(implicit docCodec: Codec.Aux[Doc, JHashMap])
         for (doc <- docCodec.decode(document))
           for ((k, id) <- mapper(doc))
             if (dCodec.decode(db.getDocument(id).getProperties).isDefined)
-              emitter.emit(kCodec.encode(k), TblDb.redirectMap(id))
+              emitter.emit(kCodec.encode(k), redirectMap(id))
       }
     }, version)
 
@@ -353,6 +354,12 @@ object TblDb {
     */
   def getCbProperties(document: Document): Map[String, AnyRef] =
   document.getProperties.asScala.filter(_._1.startsWith("_"))
+
+  def removeCbProperties(map: JHashMap): JHashMap = {
+    val res = new JHashMap
+    map.asScala.foreach { case (k, v) => if (!k.startsWith("_")) res.put(k, v) }
+    res
+  }
 
   val emptyMap: util.HashMap[String, AnyRef] = new util.HashMap[String, AnyRef]()
 
