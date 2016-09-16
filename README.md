@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.org/a-reisberg/typebase-lite.svg?branch=master)](https://travis-ci.org/a-reisberg/typebase-lite)
 
 #typebase-lite
-Typebase lite is a functional ORM for Couchbase lite: free of boilerplate and runtime reflection.
+Typebase lite is a functional ORM and query language for Couchbase lite: free of boilerplate and runtime reflection.
 
 
 ##Table of contents
@@ -27,14 +27,14 @@ Typebase lite is a functional ORM for Couchbase lite: free of boilerplate and ru
     9. [More complex queries](#more-complex-queries)
     10. [Index/View](#indexview)
     11. [Live queries](#live-queries)
-6. [A more in-depth overview](#a-more-in-depth-overview)
+6. [Roadmap](#roadmap)
     
 
 ##What?
 
 Typebase lite is a thin Scala wrapper for the Java and Android versions of Couchbase lite. It provides an automatic mapper between Couchbase lite's data and Scala's case classes and sealed trait hierarchies, free of boilerplate and runtime reflection. Moreover, many convenient functional combinators are also given to create and compose queries in a type-safe and functional manner a la LINQ. 
 
-Currently, it supports the following features: Map views (Reduce will come soon), queries and live queries. It works on both Android and the standard JVM. Since it's just a thin wrapper, any unsupported feature can be done directly with Couchbase lite.  
+Currently, it supports the following features: Map views (Reduce can be done using `reduce`, `foldLeft`, and `foldRight` on a query), queries and live queries. It works on both Android and the standard JVM. Since it's just a thin wrapper, any unsupported feature can be done directly with Couchbase lite.  
 
 It's a work in progress. The api might change without any prior warning. There's much to be improved and **you** are very welcome to try out, give comments/suggestions, and contribute!
 
@@ -139,7 +139,7 @@ For this example, we need the following imports:
 import com.couchbase.lite._
 import com.so.typebaselite.TblQuery._
 import com.so.typebaselite._
-import shapeless._
+import shapeless._ // Only needed for composite indices
 ```
 
 #### Initialize database
@@ -163,7 +163,8 @@ sealed trait Company
 
 case class Department(name: String, employeeIds: List[String]) extends Company
 
-case class Employee(name: String, age: Int, address: Address) extends Company
+// _id is the primary key
+case class Employee(_id: String, name: String, age: Int, address: Address) extends Company
 
 case class Address(city: String, zip: String)
 ```
@@ -182,31 +183,29 @@ val jamie = Employee("Jamie Saunders", 25, ny2)
 // ... more employees ...
 ```
 
-And now, we can insert the employees. The `put` function returns the `_id` of the item inserted.
+And now, we can insert the employees.
 ```scala
-// Now add employees to the db
-val johnId = tblDb.put(john)
-val jamieId = tblDb.put(jamie)
+// Now add employees to the db. the _id field will be filled in automatically.
+val john = tblDb.put(Employee(_, "John Doe", 35, ny1))
+val jamie = tblDb.put(Employee(_, "Jamie Saunders", 25, ny2))
 // ... more ids ...
 ```
 
 We finish data initialization with creating and inserting the `Department`'s.
 ```scala
 // Now create the departments
-val saleDept = Department("Sale", List(johnId, jamieId))
-val hr = Department("HR", List(bradfordId))
-val customerSupp = Department("Customer Support", List(tinaId, whitneyId))
+val saleDept = Department("Sale", List(john._id, jamie._id))
+// ... more departments ...
 
 // Now insert departments to the Db
 val saleDeptId = tblDb.put(saleDept)
-val hrId = tblDb.put(hr)
-val customerSuppId = tblDb.put(customerSupp)
+// ... more department ids ...
 ```
 
 #### Query by keys
-To retrieve, for example, the sale department, and the hr department, we just need to call `tblDb[Department](saleDeptId, hrId)`, which will return a `Seq` of `Department`'s.
+To retrieve, for example, the sale department, and the hr department, we just need to call `tblDb.getType[Department](saleDeptId, hrId)`, which will return a `Seq` of `Department`'s.
 ```scala
-println(tblDb[Department](saleDeptId, hrId))
+println(tblDb.getType[Department](saleDeptId, hrId))
 ```
 
 #### Query by types
@@ -241,8 +240,8 @@ Again, it's a two-step process
 ```scala
 // First create the query
 val deptEmployeeQ = for {
-   dept <- deptQ
-   employeeNames = tblDb[Employee](dept.employeeIds: _*).map(_.name)
+    dept <- deptQ
+    employeeNames = tblDb.getType[Employee](dept.employeeIds: _*).map(_.name)
 } yield (dept.name, employeeNames)
 
 // Then execute the query and print out the results
@@ -275,19 +274,21 @@ val cityAgeIndex = tblDb.createIndexView[String :: Int :: HNil]("city-age", "1.0
 
 Now, we can do the same query, but using the index instead:
 ```scala
-val cityAgeQ2 = cityAgeIndex.sQuery(startKey("New York" :: 30 :: HNil), endKey("New York" :: Last))
+val cityAgeQ2 = cityAgeIndex.sQuery(startKey("New York" :: 30 :: HNil), endKey("New York" :: Last)).extractType[Employee]
 
 cityAgeQ2.foreach(println)
 ```
 
-Under the hood, `Index` is created by Couchbase lite's View. More general MapViews can be created via `createMapView`. Map-Reduce will come soon.
+Under the hood, `Index` is created by Couchbase lite's View. More general MapViews can be created via `createMapView`.
+
+Since Couchbase lite's Reduce doesn't cache the data, Reduce can just be done by calling the usual combinator `reduce`, `foldLeft`, and `foldRight` on a `TblQuery` object.
 
 #### Live queries
 Now, we want to be notified whenever the result returned by `cityAgeQ2` changes (for eg. someone new from New York of age >= 30 starts at our company). A Live query will help with that.
 
 First create the live query:
 ```scala
-val liveQ = cityAgeIndex.sLiveQuery(startKey("New York" :: 30 :: HNil), endKey("New York" :: Last)).flatMap(_.to[Employee])
+val liveQ = cityAgeIndex.sLiveQuery(startKey("New York" :: 30 :: HNil), endKey("New York" :: Last)).extractType[Employee]
 ```
 Next, subscribe (in this case, we just dump the query's results to StdOut)
 ```scala
@@ -314,5 +315,9 @@ Finally, we can stop the live query by
 liveQ.stop()
 ```
 
-##A more in-depth overview
-Soon to come!
+##Roadmap
+Currently, Typebase lite is essentially quite feature complete. Feel free to make a feature request if you feel like something is missing!
+
+For the next version, we plan to add the following functionality:
+
+- Replication
