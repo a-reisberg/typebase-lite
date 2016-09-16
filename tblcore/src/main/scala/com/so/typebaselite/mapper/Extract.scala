@@ -6,6 +6,17 @@ import shapeless.labelled._
 /**
   * Created by a.reisberg on 9/10/2016.
   */
+
+/**
+  * Typeclass to extract one case class from another.
+  * For example, if all of the fields in case class T appear in case class F,
+  * then one can get an instance of case class T out of an instance of case class F.
+  *
+  * It has support for Option, Map, List and Set as well.
+  *
+  * @tparam From Input type
+  * @tparam To Output type
+  */
 trait Extract[From, To] {
   self =>
   def apply(t: From): Option[To]
