@@ -1,4 +1,4 @@
-package com.so.typebaselite
+package io.typebase.lite
 
 import java.util.{ArrayList => JList, HashMap => JMap, HashSet => JSet}
 

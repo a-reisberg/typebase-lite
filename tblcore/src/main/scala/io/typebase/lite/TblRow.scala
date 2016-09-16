@@ -1,7 +1,7 @@
-package com.so.typebaselite
+package io.typebase.lite
 
 import com.couchbase.lite.{Document, QueryRow}
-import com.so.typebaselite.mapper.Codec
+import io.typebase.lite.mapper.Codec
 
 /**
   * Created by a.reisberg on 8/31/2016.

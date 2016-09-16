@@ -1,11 +1,12 @@
-package com.so.typebaselite
+package io.typebase.lite
 
 import java.util
 
 import com.couchbase.lite.Document.{ChangeEvent, ChangeListener, DocumentUpdater}
 import com.couchbase.lite._
-import com.so.typebaselite.TblRow._
-import com.so.typebaselite.mapper._
+import io.typebase.lite.TblRow._
+import io.typebase.lite.mapper._
+import io.typebase.lite.mapper.Codec
 import shapeless.Typeable
 
 import scala.collection.JavaConverters._

@@ -1,9 +1,9 @@
-package com.so.typebaselite
+package io.typebase.lite
 
 import java.util
 
 import com.couchbase.lite.{Query, QueryRow}
-import com.so.typebaselite.mapper._
+import io.typebase.lite.mapper.{Codec, NameHelper, _}
 import shapeless.Typeable
 
 import scala.collection.JavaConverters._
@@ -33,7 +33,7 @@ trait TblQuery[A] {
   def transform: Stream[E] => Stream[A]
 
   def subscribe(f: Stream[A] => Unit)(implicit ev: Subscribable.Aux[S, Stream[E]]): Subscription =
-  ev.subscribe(source)(es => f(transform(es)))
+    ev.subscribe(source)(es => f(transform(es)))
 
   def start()(implicit ev: Subscribable[S]): Unit = ev.start(source)
 

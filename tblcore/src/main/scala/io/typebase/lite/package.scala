@@ -1,6 +1,7 @@
-package com.so
+package io.typebase
 
-import com.so.typebaselite.mapper._
+import io.typebase.lite.mapper._
+import io.typebase.lite.mapper.Codec
 import shapeless.{HNil, Typeable, _}
 
 import scala.language.implicitConversions
@@ -8,7 +9,7 @@ import scala.language.implicitConversions
 /**
   * Created by a.reisberg on 8/31/2016.
   */
-package object typebaselite {
+package object lite {
 
   case object Empty
 

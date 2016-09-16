@@ -1,4 +1,4 @@
-package com.so.typebaselite
+package io.typebase.lite
 
 /**
   * Created by a.reisberg on 8/31/2016.

@@ -1,4 +1,4 @@
-package com.so.tbldemo.data
+package io.typebase.lite.demo.data
 
 /**
   * Created by a.reisberg on 8/30/2016.

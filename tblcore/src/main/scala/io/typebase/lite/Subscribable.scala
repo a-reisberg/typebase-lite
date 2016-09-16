@@ -1,4 +1,4 @@
-package com.so.typebaselite
+package io.typebase.lite
 
 import com.couchbase.lite.LiveQuery._
 import com.couchbase.lite._

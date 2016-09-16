@@ -98,11 +98,11 @@ sbt publishLocal
 
 Inside the `build.sbt` of your project, add the following line
 ```scala
-libraryDependencies += "com.so" %% "typebase-lite-java" % "0.1-SNAPSHOT"
+libraryDependencies += "io.typebase" %% "typebase-lite-java" % "0.1-SNAPSHOT"
 ```
 if you're using it in the standard JVM, or
 ```scala
-libraryDependencies += "com.so" %% "typebase-lite-android" % "0.1-SNAPSHOT"
+libraryDependencies += "io.typebase" %% "typebase-lite-android" % "0.1-SNAPSHOT"
 ```
 if you're using it on Android.
 
@@ -122,13 +122,13 @@ Many of the concepts here are related to (and influenced by) the ones in Couchba
 #### Standard JVM
 The examples mentioned below runs outside of Android and could be found under the `tbljavademo` subproject. The data schema is defined in
 ```scala
-com.so.tbldemo.data
+io.typebase.lite.demo.data
 ```
 and the running example implemented in
 ```scala
-com.so.tbldemo.launch.LaunchDemo
+io.typebase.lite.demo.launch.LaunchDemo
 ```
-You can jump straight ahead to `com.so.tbldemo.launch.LaunchDemo` and run it.
+You can jump straight ahead to `io.typebase.lite.demo.launch.LaunchDemo` and run it.
 
 #### Android
 The Android demo could be found here: [https://github.com/a-reisberg/tbl-android-demo](https://github.com/a-reisberg/tbl-android-demo).
@@ -137,8 +137,8 @@ The Android demo could be found here: [https://github.com/a-reisberg/tbl-android
 For this example, we need the following imports:
 ```scala
 import com.couchbase.lite._
-import com.so.typebaselite.TblQuery._
-import com.so.typebaselite._
+import io.typebase.lite.TblQuery._
+import io.typebase.lite._
 import shapeless._ // Only needed for composite indices
 ```
 

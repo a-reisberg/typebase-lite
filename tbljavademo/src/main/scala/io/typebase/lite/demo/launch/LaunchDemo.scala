@@ -1,9 +1,9 @@
-package com.so.tbldemo.launch
+package io.typebase.lite.demo.launch
 
 import com.couchbase.lite._
-import com.so.tbldemo.data._
-import com.so.typebaselite.TblQuery._
-import com.so.typebaselite._
+import io.typebase.lite.demo.data._
+import io.typebase.lite.TblQuery._
+import io.typebase.lite._
 import shapeless._
 
 import scala.io.StdIn

@@ -1,4 +1,4 @@
-package com.so.typebaselite.mapper
+package io.typebase.lite.mapper
 
 import java.util.{List => JList, Map => JMap, Set => JSet}
 
