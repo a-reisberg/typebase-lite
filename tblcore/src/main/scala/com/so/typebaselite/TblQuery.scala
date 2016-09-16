@@ -4,6 +4,7 @@ import java.util
 
 import com.couchbase.lite.{Query, QueryRow}
 import com.so.typebaselite.mapper._
+import shapeless.Typeable
 
 import scala.collection.JavaConverters._
 import scala.collection.generic.CanBuildFrom
@@ -31,11 +32,6 @@ trait TblQuery[A] {
 
   def transform: Stream[E] => Stream[A]
 
-  // This isn't very efficient since it will ignore the results inside
-  // ChangeEvent and re-runs the query instead. The listener is only used
-  // as a signaling device without any data.  This is because the abstraction
-  // used in TblQuery (the transform function) doesn't allow transform to be
-  // applied to a row enumerator. But it shouldn't be too bad.
   def subscribe(f: Stream[A] => Unit)(implicit ev: Subscribable.Aux[S, Stream[E]]): Subscription =
   ev.subscribe(source)(es => f(transform(es)))
 
@@ -92,6 +88,9 @@ trait TblQuery[A] {
 
   def extract[B](implicit extractB: Extract[A, B]): FullAux[S, E, B] =
     lift(_.flatMap(extractB.apply))
+
+  def extractType[B <: A](implicit bTypeable: Typeable[B]): FullAux[S, E, B] =
+    lift(_.flatMap(bTypeable.cast))
 
   def hasDefiniteSize: Boolean = false
 
