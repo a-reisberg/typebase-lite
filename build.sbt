@@ -1,3 +1,5 @@
+import com.typesafe.sbt.pgp.PgpKeys._
+
 scalaVersion := "2.11.8"
 
 // scalacOptions ++= Seq("-Xlog-implicits")
@@ -17,6 +19,11 @@ lazy val commonSettings = Seq(
   javacOptions ++= Seq("-source", "1.7", "-target", "1.7"),
   scalacOptions ++= Seq("-feature", "-language:postfixOps", "-language:implicitConversions", "-language:higherKinds", "-target:jvm-1.7")
 )
+
+lazy val root = (project in file("."))
+  .settings(commonSettings)
+  .settings(publishSigned := ())
+  .aggregate(tblCore, tblJava, tblAndroid)
 
 lazy val tblCore = (project in file("tblcore"))
   .settings(commonSettings)
