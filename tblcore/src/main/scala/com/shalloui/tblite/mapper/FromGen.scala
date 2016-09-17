@@ -1,4 +1,4 @@
-package io.typebase.lite.mapper
+package com.shalloui.tblite.mapper
 
 import shapeless._
 import shapeless.labelled._
@@ -12,7 +12,7 @@ import scala.util.Try
   * [[JSetInterface]] to Scala's (possibly nested) sealed trait hierarchy, [[List]] and [[Set]]. Optional
   * fields are supported.
   *
-  * See [[ToGen]] for the other direction. See package object for usage example.
+  * See [[ToGen]] for the other direction. See tblite object for usage example.
   *
   * Created by a.reisberg on 8/22/2016.
   */

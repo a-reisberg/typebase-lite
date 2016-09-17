@@ -70,7 +70,7 @@ will execute the query and print out the results.
 ####Isn't that slow? How about indexing?
 Yes! In the above, we already used one, which indexes the types of the documents.
 
-You can create a custom indices, even **composite indices** are supported! In this case we want to create a composite index consisting of 2 keys: city and age:
+You can create custom indices, even **composite indices** are supported! In this case we want to create a composite index consisting of 2 keys: city and age:
 ```scala
 val cityAgeIndex = tblDb.createIndexView[String :: Int :: HNil]("city-age", "1.0", {
     case e: Employee => Set(e.address.city :: e.age :: HNil)
@@ -98,11 +98,11 @@ sbt publishLocal
 
 Inside the `build.sbt` of your project, add the following line
 ```scala
-libraryDependencies += "io.typebase" %% "typebase-lite-java" % "0.1-SNAPSHOT"
+libraryDependencies += "com.shalloui" %% "typebase-lite-java" % "0.1-SNAPSHOT"
 ```
 if you're using it in the standard JVM, or
 ```scala
-libraryDependencies += "io.typebase" %% "typebase-lite-android" % "0.1-SNAPSHOT"
+libraryDependencies += "com.shalloui" %% "typebase-lite-android" % "0.1-SNAPSHOT"
 ```
 if you're using it on Android.
 
@@ -122,13 +122,13 @@ Many of the concepts here are related to (and influenced by) the ones in Couchba
 #### Standard JVM
 The examples mentioned below runs outside of Android and could be found under the `tbljavademo` subproject. The data schema is defined in
 ```scala
-io.typebase.lite.demo.data
+com.shalloui.tblite.demo.data
 ```
 and the running example implemented in
 ```scala
-io.typebase.lite.demo.launch.LaunchDemo
+com.shalloui.tblite.demo.launch.LaunchDemo
 ```
-You can jump straight ahead to `io.typebase.lite.demo.launch.LaunchDemo` and run it.
+You can jump straight ahead to the code and run it.
 
 #### Android
 The Android demo could be found here: [https://github.com/a-reisberg/tbl-android-demo](https://github.com/a-reisberg/tbl-android-demo).
@@ -137,8 +137,8 @@ The Android demo could be found here: [https://github.com/a-reisberg/tbl-android
 For this example, we need the following imports:
 ```scala
 import com.couchbase.lite._
-import io.typebase.lite.TblQuery._
-import io.typebase.lite._
+import com.shalloui.tbl.TblQuery._
+import com.shalloui.tbl._
 import shapeless._ // Only needed for composite indices
 ```
 

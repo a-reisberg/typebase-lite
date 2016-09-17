@@ -1,4 +1,4 @@
-package io.typebase.lite.mapper
+package com.shalloui.tblite.mapper
 
 import java.util.{ArrayList => JList, HashMap => JMap, HashSet => JSet}
 
@@ -11,7 +11,7 @@ import shapeless.labelled.FieldType
   * [[JSet]] to Scala's (possibly nested) sealed trait hierarchy, [[List]] and [[Set]].
   * Optional fields are supported.
   *
-  * See [[FromGen]] for the other direction. See package object for usage example.
+  * See [[FromGen]] for the other direction. See tblite object for usage example.
   *
   * Created by a.reisberg on 8/22/2016.
   */

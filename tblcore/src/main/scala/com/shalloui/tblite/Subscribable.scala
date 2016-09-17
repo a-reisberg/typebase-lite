@@ -1,4 +1,4 @@
-package io.typebase.lite
+package com.shalloui.tblite
 
 import com.couchbase.lite.LiveQuery._
 import com.couchbase.lite._

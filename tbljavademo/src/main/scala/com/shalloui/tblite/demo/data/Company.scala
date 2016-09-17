@@ -1,4 +1,4 @@
-package io.typebase.lite.demo.data
+package com.shalloui.tblite.demo.data
 
 /**
   * Created by a.reisberg on 8/30/2016.

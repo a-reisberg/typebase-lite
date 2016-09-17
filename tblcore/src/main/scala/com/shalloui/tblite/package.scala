@@ -1,7 +1,6 @@
-package io.typebase
+package com.shalloui
 
-import io.typebase.lite.mapper._
-import io.typebase.lite.mapper.Codec
+import com.shalloui.tblite.mapper.{Codec, _}
 import shapeless.{HNil, Typeable, _}
 
 import scala.language.implicitConversions
@@ -9,7 +8,7 @@ import scala.language.implicitConversions
 /**
   * Created by a.reisberg on 8/31/2016.
   */
-package object lite {
+package object tblite {
 
   case object Empty
 

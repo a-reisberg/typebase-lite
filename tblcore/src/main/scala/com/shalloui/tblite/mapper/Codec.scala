@@ -1,4 +1,4 @@
-package io.typebase.lite.mapper
+package com.shalloui.tblite.mapper
 
 /**
   * Typeclass for converting an object of type [[T]]

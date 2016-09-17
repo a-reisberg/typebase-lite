@@ -1,12 +1,11 @@
-package io.typebase.lite
+package com.shalloui.tblite
 
 import java.util
 
 import com.couchbase.lite.Document.{ChangeEvent, ChangeListener, DocumentUpdater}
 import com.couchbase.lite._
-import io.typebase.lite.TblRow._
-import io.typebase.lite.mapper._
-import io.typebase.lite.mapper.Codec
+import com.shalloui.tblite.TblRow._
+import com.shalloui.tblite.mapper.{Codec, _}
 import shapeless.Typeable
 
 import scala.collection.JavaConverters._

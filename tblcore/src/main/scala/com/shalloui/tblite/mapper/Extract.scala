@@ -1,4 +1,4 @@
-package io.typebase.lite.mapper
+package com.shalloui.tblite.mapper
 
 import shapeless._
 import shapeless.labelled._

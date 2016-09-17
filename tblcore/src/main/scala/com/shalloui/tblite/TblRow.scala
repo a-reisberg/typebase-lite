@@ -1,7 +1,7 @@
-package io.typebase.lite
+package com.shalloui.tblite
 
 import com.couchbase.lite.{Document, QueryRow}
-import io.typebase.lite.mapper.Codec
+import com.shalloui.tblite.mapper.Codec
 
 /**
   * Created by a.reisberg on 8/31/2016.

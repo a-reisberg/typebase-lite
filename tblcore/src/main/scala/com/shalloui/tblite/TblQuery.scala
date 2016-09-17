@@ -1,9 +1,9 @@
-package io.typebase.lite
+package com.shalloui.tblite
 
 import java.util
 
 import com.couchbase.lite.{Query, QueryRow}
-import io.typebase.lite.mapper.{Codec, NameHelper, _}
+import com.shalloui.tblite.mapper.{Codec, NameHelper, _}
 import shapeless.Typeable
 
 import scala.collection.JavaConverters._

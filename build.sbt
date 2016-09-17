@@ -2,13 +2,13 @@ scalaVersion := "2.11.8"
 
 // scalacOptions ++= Seq("-Xlog-implicits")
 
-lazy val myOrg = "io.typebase"
+lazy val myOrg = "com.shalloui"
 lazy val shapelessVersion = "2.3.2"
 lazy val cblJavaVersion = "1.3.0"
 lazy val cblAndroidVersion = "1.3.0"
 lazy val cblJavaForestDBVersion = "1.3.0"
 
-lazy val currentVersion = "0.1-SNAPSHOT"
+lazy val currentVersion = "0.1"
 
 lazy val commonSettings = Seq(
   scalaVersion := "2.11.8",

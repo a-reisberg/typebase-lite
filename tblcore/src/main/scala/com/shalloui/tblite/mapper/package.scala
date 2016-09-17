@@ -1,8 +1,6 @@
-package io.typebase.lite
+package com.shalloui.tblite
 
 import java.util.{ArrayList => JList, HashMap => JMap, HashSet => JSet}
-
-import shapeless._
 
 /**
   * Conjure up instances of [[ToGen]], [[FromGen]] and [[FromAny]].

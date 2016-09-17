@@ -1,9 +1,10 @@
-package io.typebase.lite
+package com.shalloui.tblite
 
 /**
   * Created by a.reisberg on 8/31/2016.
   */
-trait Subscription { self =>
+trait Subscription {
+  self =>
   def dispose(): Unit
 
   def +(s: Subscription): Subscription = new Subscription {

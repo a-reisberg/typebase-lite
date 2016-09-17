@@ -1,10 +1,9 @@
-package io.typebase.lite
+package com.shalloui.tblite
 
 import com.couchbase.lite._
-import io.typebase.lite.TblQuery._
-import io.typebase.lite.TblRow._
-import io.typebase.lite.mapper._
-import io.typebase.lite.mapper.{Codec, NameHelper}
+import com.shalloui.tblite.TblQuery._
+import com.shalloui.tblite.TblRow._
+import com.shalloui.tblite.mapper.{Codec, NameHelper}
 
 
 /**
