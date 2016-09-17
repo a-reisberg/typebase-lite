@@ -87,22 +87,13 @@ val query2 = cityAgeIndex.sQuery(startKey("New York" :: 30 :: HNil), endKey("New
 Queries can be composed and reused in a functional manner, and can be mixed and matched seamlessly with Scala's collections as well.
 
 ## Quick start
-To start using this library, first clone the repository 
-```
-git clone https://github.com/a-reisberg/typebase-lite.git
-```
-and run
-```
-sbt publishLocal
-```
-
-Inside the `build.sbt` of your project, add the following line
+Typebase lite is published on Maven central. To use it, inside the `build.sbt` of your project, add the following line
 ```scala
-libraryDependencies += "com.shalloui" %% "typebase-lite-java" % "0.1-SNAPSHOT"
+libraryDependencies += "com.shalloui" %% "typebase-lite-java" % "0.1"
 ```
 if you're using it in the standard JVM, or
 ```scala
-libraryDependencies += "com.shalloui" %% "typebase-lite-android" % "0.1-SNAPSHOT"
+libraryDependencies += "com.shalloui" %% "typebase-lite-android" % "0.1"
 ```
 if you're using it on Android.
 
