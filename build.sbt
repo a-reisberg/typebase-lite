@@ -18,8 +18,6 @@ lazy val commonSettings = Seq(
   scalacOptions ++= Seq("-feature", "-language:postfixOps", "-language:implicitConversions", "-language:higherKinds", "-target:jvm-1.7")
 )
 
-lazy val root = (project in file(".")).settings(commonSettings).settings(publishSigned := ())
-
 lazy val tblCore = (project in file("tblcore"))
   .settings(commonSettings)
   .settings(
