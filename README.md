@@ -72,7 +72,7 @@ Yes! In the above, we already used one, which indexes the types of the documents
 
 You can create custom indices, even **composite indices** are supported! In this case we want to create a composite index consisting of 2 keys: city and age:
 ```scala
-val cityAgeIndex = tblDb.createIndexView[String :: Int :: HNil]("city-age", "1.0", {
+val cityAgeIndex = tblDb.createIndex[String :: Int :: HNil]("city-age", "1.0", {
     case e: Employee => Set(e.address.city :: e.age :: HNil)
     case _ => Set()
 })
@@ -257,7 +257,7 @@ The last query in the previous section just loops over all employees and filters
 where `String` and `Int` are for city names and ages respectively.
 ```scala
 // Create the index
-val cityAgeIndex = tblDb.createIndexView[String :: Int :: HNil]("city-age", "1.0", {
+val cityAgeIndex = tblDb.createIndex[String :: Int :: HNil]("city-age", "1.0", {
     case e: Employee => Set(e.address.city :: e.age :: HNil)
     case _ => Set()
 })
