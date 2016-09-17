@@ -35,7 +35,7 @@ lazy val tblJava = (project in file("tbljava"))
     libraryDependencies ++= Seq(
       "com.couchbase.lite" % "couchbase-lite-java" % cblJavaVersion
     )
-  ) dependsOn tblCore  aggregate tblCore
+  ) dependsOn tblCore aggregate tblCore
 
 lazy val tblAndroid = (project in file("tblandroid"))
   .settings(commonSettings)
@@ -44,9 +44,9 @@ lazy val tblAndroid = (project in file("tblandroid"))
     libraryDependencies ++= Seq(
       "com.couchbase.lite" % "couchbase-lite-android" % cblAndroidVersion
     )
-  ) dependsOn tblCore  aggregate tblCore
+  ) dependsOn tblCore aggregate tblCore
 
-lazy val tblJavaDemo = (project in file ("tbljavademo"))
+lazy val tblJavaDemo = (project in file("tbljavademo"))
   .settings(commonSettings)
   .settings(
     name := "typebase-lite-java-demo",
