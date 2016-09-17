@@ -182,6 +182,12 @@ To retrieve, for example, the sale department, and the hr department, we just ne
 println(tblDb.getType[Department](saleDeptId, hrId))
 ```
 
+Note that we could also do
+```scala
+tblDb.get(saleDeptId, hrId)
+```
+and everything still works, except that the return type would be `Company` instead of the more precise type `Department`. Of course, we could then also do a pattern matching, but the code wouldn't be as concise as using `getType[T]`.
+
 #### Query by types
 Typebase lite automatically creates an index based on the type of each entry. This index could be accessed by
 ```scala
