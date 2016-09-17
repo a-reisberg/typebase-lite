@@ -161,35 +161,18 @@ case class Address(city: String, zip: String)
 ```
 
 #### Insert
-Let's first create some random data for `Employee`'s
-```scala
-// Create some random addresses
-val ny1 = Address("New York", "12345")
-val ny2 = Address("New York", "13245")
-// ... more addresses ...
-
-// and some random employees
-val john = Employee("John Doe", 35, ny1)
-val jamie = Employee("Jamie Saunders", 25, ny2)
-// ... more employees ...
-```
-
+Let's first insert some random data for `Employee`'s
 And now, we can insert the employees.
 ```scala
 // Now add employees to the db. the _id field will be filled in automatically.
-val john = tblDb.put(Employee(_, "John Doe", 35, ny1))
-val jamie = tblDb.put(Employee(_, "Jamie Saunders", 25, ny2))
-// ... more ids ...
+val john = tblDb.put(Employee(_, "John Doe", 35, Address("New York", "12345")))
+val jamie = tblDb.put(Employee(_, "Jamie Saunders", 25, Address("New York", "13245")))
+// ... more employees ...
 ```
 
-We finish data initialization with creating and inserting the `Department`'s.
+We finish data initialization by creating and inserting the `Department`'s.
 ```scala
-// Now create the departments
-val saleDept = Department("Sale", List(john._id, jamie._id))
-// ... more departments ...
-
-// Now insert departments to the Db
-val saleDeptId = tblDb.put(saleDept)
+val saleDeptId = tblDb.put(Department("Sale", List(john._id, jamie._id)))
 // ... more department ids ...
 ```
 
