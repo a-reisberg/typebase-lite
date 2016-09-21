@@ -128,8 +128,8 @@ The Android demo could be found here: [https://github.com/a-reisberg/tbl-android
 For this example, we need the following imports:
 ```scala
 import com.couchbase.lite._
-import com.shalloui.tbl.TblQuery._
-import com.shalloui.tbl._
+import com.shalloui.tblite.TblQuery._
+import com.shalloui.tblite._
 import shapeless._ // Only needed for composite indices
 ```
 
